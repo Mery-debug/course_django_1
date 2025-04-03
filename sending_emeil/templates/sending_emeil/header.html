@@ -1,0 +1,21 @@
+<header>
+  <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <h5 class="my-0 mr-md-auto font-weight-normal">Список рассылок</h5>
+    <nav class="ms-5">
+      <a class="p-2 btn btn-outline-primary" href="/">На главную</a>
+      <a class="p-2 btn btn-outline-primary" href="/authorization/spam_list/">Список статей</a>
+      <a class="p-2 btn btn-outline-primary" href="/authorization/product_list/">Каталог</a>
+      {% if user.is_active %}
+        <form method="post" action="{% url 'authorization:logout' %}" style="display: inline;">
+          {% csrf_token %}
+          <a href="/authorization/product_list/"><button class="p-2 btn btn-outline-primary" type="submit">Выйти</button></a>
+          <p>Добро пожаловать, {{ user.email }}!</p>
+        </form>
+      {% else %}
+        <a href="{% url 'authorization:login' %}"><button class="p-2 btn btn-outline-primary" type="submit">Войти</button></a>
+        <a href="{% url 'authorization:register' %}"><button class="p-2 btn btn-outline-primary" type="submit">Регистрация</button></a>
+        <p>Добро пожаловать в каталог продуктов!</p>
+      {% endif %}
+    </nav>
+  </div>
+</header>
