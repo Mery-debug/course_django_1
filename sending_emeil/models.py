@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class SendingUser:
+class SendingUser(models.Model):
     email = models.EmailField(unique=True)
     fio = models.CharField(blank=True, null=True)
     description = models.CharField(blank=True, null=True)
@@ -15,28 +15,40 @@ class SendingUser:
         ordering = ["email"]
 
 
-class Email:
-    subject= models.CharField(max_length=100, verbose_name="subject mail")
-    text = models.TextField(max_length=1500, verbose_name="text")
+class Email(models.Model):
+    subject = models.CharField(max_length=100, verbose_name="Тема письма")
+    text = models.TextField(max_length=1500, verbose_name="Текст письма")
 
     def __str__(self):
-        return f"{self.subject} {self.text}"
+        return self.subject
 
     class Meta:
         verbose_name = "Письмо"
         verbose_name_plural = "Письма"
-        ordering = ["subject_mail"]
+        ordering = ["subject"]
 
 
-class Sending:
-    date_fist = models.DateField()
-    date_last = models.DateField()
-    status = models.CharField()
-    mail = models.ForeignKey(Email, on_delete=models.CASCADE, related_name='Письмо', blank=True, null=True)
-    users = models.ManyToManyField(SendingUser, on_delete=models.CASCADE, related_name='Получатели рассылки', blank=True, null=True)
+class Sending(models.Model):
+    date_first = models.DateField(verbose_name="Дата начала")
+    date_last = models.DateField(verbose_name="Дата окончания")
+    status = models.CharField(max_length=50, verbose_name="Статус")  # Добавлен max_length
+    mail = models.ForeignKey(
+        Email,
+        on_delete=models.CASCADE,
+        related_name='sendings',
+        blank=True,
+        null=True,
+        verbose_name="Письмо"
+    )
+    users = models.ManyToManyField(
+        'SendingUser',
+        related_name='mailings',
+        blank=True,
+        verbose_name="Получатели"
+    )
 
     def __str__(self):
-        return f"{self.mail} {self.users} {self.status}"
+        return f"Рассылка #{self.id} ({self.status})"
 
     class Meta:
         verbose_name = "Рассылка"

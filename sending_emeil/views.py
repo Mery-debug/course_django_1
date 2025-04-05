@@ -1,10 +1,10 @@
-from msilib.schema import ListView
+
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView, ListView
 
 from sending_emeil.forms import EmailForm, SendingForm
 from sending_emeil.models import Sending, Email
