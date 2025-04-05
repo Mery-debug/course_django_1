@@ -16,11 +16,11 @@ class SendingUser:
 
 
 class Email:
-    subject_mail = models.CharField(max_length=100, verbose_name="subject mail")
-    mail_text = models.TextField(max_length=1500, verbose_name="text")
+    subject= models.CharField(max_length=100, verbose_name="subject mail")
+    text = models.TextField(max_length=1500, verbose_name="text")
 
     def __str__(self):
-        return f"{self.subject_mail} {self.mail_text}"
+        return f"{self.subject} {self.text}"
 
     class Meta:
         verbose_name = "Письмо"
