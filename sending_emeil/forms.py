@@ -1,8 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Email
-
+from .models import Email, Sending
 
 
 class EmailForm(forms.ModelForm):
@@ -13,6 +12,25 @@ class EmailForm(forms.ModelForm):
     class Meta:
         model = Email
         fields = ['subject', 'text']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-control",
+                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+class SendingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = Sending
+        fields = ['mail', 'status', 'users', 'date_first', 'date_last']
 
     def update_field_attributes(self):
         for field_name in self.fields:

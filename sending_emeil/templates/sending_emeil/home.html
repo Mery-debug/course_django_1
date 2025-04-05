@@ -1,10 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "sending_emeil/base.html" %}
 
-</body>
-</html>
+{% block title %}Рассылка{% endblock %}
+{% block content %}
+
+<ul>
+    <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">Список рассылок</h1>
+    </div>
+
+<div class="container">
+    <div class="row text-center">
+        <div class="col-8">
+            <div class="col-sm-4 w-30">
+                <div class="card mb-4 box-shadow ">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal">Удобный сервис для поиска и отправки рассылок</h4>
+                    </div>
+                    {% if user.is_active %}
+                    <div class="card-body">
+                        {% csrf_token %}
+                        <a href="{% url 'sending_mail:mail_list' %}" class="btn btn-lg btn-block btn-outline-primary">
+                            посмотреть прошедшие рассылки
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="card-body">
+                        {% csrf_token %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</ul>
+{% include "sending_emeil/floor.html" %}
+{% endblock %}
