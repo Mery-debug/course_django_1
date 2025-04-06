@@ -86,11 +86,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "send",
-        "USER": "postgres",
-        "PASSWORD": 12345,
-        "HOST": "localhost",
-        "PORT": 5432,
+        "NAME": os.getenv("NAME"),
+        "USER": os.getenv("USER"),
+        "PASSWORD": os.getenv("PASSWORD"),
+        "HOST": os.getenv("HOST"),
+        "PORT": os.getenv("PORT"),
         'OPTIONS': {
             'client_encoding': 'UTF8',
             'options': '-c client_encoding=UTF8',
@@ -162,17 +162,3 @@ if CACHE_ENABLE:
         }
     }
 
-import psycopg2
-from urllib.parse import quote_plus
-
-try:
-    conn = psycopg2.connect(
-        dbname="send",
-        user="postgres",
-        password="12345",
-        host="localhost",
-        port="5432"
-    )
-    print("Подключение успешно!")
-except Exception as e:
-    print(f"Ошибка: {str(e)}")
