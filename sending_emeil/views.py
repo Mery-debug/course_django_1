@@ -1,6 +1,5 @@
-
-
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -34,7 +33,7 @@ class SendingDetailView(DetailView):
 class SendingCreateView(CreateView):
     model = Sending
     form_class = SendingForm
-    template_name = "sending_emeil/create_sending.html"
+    template_name = "sending_emeil/sending_create.html"
 
     def get_success_url(self):
         return reverse_lazy("sending_emeil:sending_list")
@@ -43,7 +42,7 @@ class SendingCreateView(CreateView):
 class SendingUpdateView(UpdateView):
     model = Sending
     form_class = SendingForm
-    template_name = "sending_emeil/update_sending.html"
+    template_name = "sending_emeil/sending_update.html"
 
     def get_success_url(self):
         return reverse_lazy(
@@ -54,6 +53,13 @@ class SendingUpdateView(UpdateView):
 class SendingDeleteView(DeleteView):
     model = Sending
     success_url = reverse_lazy("sending_emeil:sending_list")
+    context_object_name = "sendings"
+
+
+class MailListView(ListView):
+    model = Email
+    template_name = "sending_emeil/mail_list.html"
+    context_object_name = "emails"
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
@@ -66,25 +72,28 @@ class MailDetailView(DetailView):
             "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
         )
 
+
 class MailUpdateView(UpdateView):
     model = Email
     form_class = EmailForm
-    template_name = "sending_emeil/update_mail.html"
+    template_name = "sending_emeil/mail_update.html"
 
     def get_success_url(self):
         return reverse_lazy(
             "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
         )
+
 
 class MailCreateView(CreateView):
     model = Email
     form_class = EmailForm
-    template_name = "sending_emeil/create_mail.html"
+    template_name = "sending_emeil/mail_create.html"
 
     def get_success_url(self):
         return reverse_lazy(
             "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
         )
+
 
 class MailDeleteView(DeleteView):
     model = Email

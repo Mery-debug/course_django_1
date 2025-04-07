@@ -18,7 +18,7 @@ class EmailForm(forms.ModelForm):
             self.fields[field_name].widget.attrs.update(
                 {
                     "class": "form-control",
-                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                    "placeholder": f"{self.fields[field_name].label.lower()}",
                 }
             )
 
@@ -37,6 +37,6 @@ class SendingForm(forms.ModelForm):
             self.fields[field_name].widget.attrs.update(
                 {
                     "class": "form-control",
-                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                    "placeholder": f"{self.fields[field_name].label.lower()}",
                 }
             )

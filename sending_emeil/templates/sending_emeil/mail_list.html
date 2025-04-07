@@ -1,0 +1,24 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Письма{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список писем</h1>
+
+<ul>
+  <a class="btn btn-dark" href="{% url 'sending_emeil:mail_create' %}">Добавить письмо</a>
+    {% for email in emails %}
+        <div class="card">
+            <div class="card-body">
+                <li class="list-group-item">
+                    Тема письма:
+                    <a href="{% url 'sending_emeil:mail_detail' email.pk %}">{{ email.subject }}</a>
+                </li>
+                <li class="list-group-item">Текст письма: {{ email.text | truncatechars:100 }}</li>
+            </div>
+        </div>
+    {% empty %}
+        <li>У вас не создано ни одного письма, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

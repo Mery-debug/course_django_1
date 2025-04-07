@@ -3,7 +3,6 @@
 {% block title %}Рассылка{% endblock %}
 
 {% block content %}
-
 <h1 class="mb-4">Список рассылок</h1>
 
 <ul>
@@ -16,7 +15,7 @@
                     Название рассылки:
                     <a href="{% url 'sending_emeil:sending_detail' product.pk %}">{{sending.mail.subject}}</a>
                 </li>
-                <li class="list-group-item">Категория товара: {{sending.status}}</li>
+                <li class="list-group-item">Статус рассылки: {{sending.status}}</li>
                 <li class="list-group-item">Дата начала отправки: {{sending.date_first}}</li>
                 <li class="list-group-item">Дата окончания отправки: {{sending.date_last}}</li>
             </div>
@@ -25,5 +24,4 @@
         <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
         {% endfor %}
 </ul>
-{% include "sending_emeil/floor.html" %}
 {% endblock %}

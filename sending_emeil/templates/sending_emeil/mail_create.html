@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавление нового письма</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Добавление нового письма</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'sending_emeil:mail_list' %}">
+                <button type="submit" class="btn btn-dark">Сохранить</button>
+            </a>
+            <a href="{% url 'sending_emeil:mail_list' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
