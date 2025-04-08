@@ -35,14 +35,14 @@ class Sending(models.Model):
     mail = models.ForeignKey(
         Email,
         on_delete=models.CASCADE,
-        related_name='sendings',
+        related_name='Письма',
         blank=True,
         null=True,
-        verbose_name="Письмо"
+        verbose_name="Письма"
     )
     users = models.ManyToManyField(
-        'SendingUser',
-        related_name='mailings',
+        SendingUser,
+        related_name='Получатели',
         blank=True,
         verbose_name="Получатели"
     )
