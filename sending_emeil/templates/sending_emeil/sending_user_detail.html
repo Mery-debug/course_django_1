@@ -1,10 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'sending_emeil/base.html' %}
 
-</body>
-</html>
+{% block title %}{{ sending_user }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ sending_user.email }}</h1>
+<ul>
+    <div class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            <li class="list-group-item">ФИО: {{ sending_user.fio }}</li>
+            <li class="list-group-item">Описание: {{ sending_user.description }}</li>
+            <a href="{% url 'sending_emeil:sending_user_update' sending_user.pk %}" class="btn btn-secondary">Редактировать</a>
+            <a href="{% url 'sending_emeil:sending_user_delete' sending_user.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'sending_emeil:sending_user_list' %}" class="btn btn-primary">Вернуться к списку</a>
+        </div>
+    </div>
+</ul>
+{% endblock %}

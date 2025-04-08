@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'sending_emeil/base.html' %}
 
-</body>
-</html>
+{% block title %}{{ sending.email.subject }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ sending.mail.subject }}</h1>
+<ul>
+    <div class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            <li class="list-group-item">Тема письма: {{ sending.mail.subject }}</li>
+            <li class="list-group-item">Дата начала рассылки: {{ sending.date_first }}</li>
+            <li class="list-group-item">Дата окончания рассылки: {{ sending.date_last }}</li>
+            <li class="list-group-item">Статус рассылки: {{ sending.status }}</li>
+            <li class="list-group-item">Список пользователей: {{ sending.users }}</li>
+            <a href="{% url 'sending_emeil:sending_update' sending.pk %}" class="btn btn-secondary">Редактировать</a>
+            <a href="{% url 'sending_emeil:sending_delete' sending.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'sending_emeil:sending_list' %}" class="btn btn-primary">Вернуться к списку</a>
+        </div>
+    </div>
+</ul>
+{% endblock %}

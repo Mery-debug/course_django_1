@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'sending_emeil/base.html' %}
 
-</body>
-</html>
+{% block title %}Добавление новой рассылки{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Добавление новой рассылки</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'sending_emeil:sending_list' %}">
+                <button type="submit" class="btn btn-dark">Сохранить</button>
+            </a>
+            <a href="{% url 'sending_emeil:sending_list' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+{% endblock %}

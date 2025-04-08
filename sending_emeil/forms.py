@@ -30,7 +30,7 @@ class SendingForm(forms.ModelForm):
 
     class Meta:
         model = Sending
-        fields = ['mail', 'status', 'users', 'date_first', 'date_last']
+        fields = ['mail', 'users']
 
     def update_field_attributes(self):
         for field_name in self.fields:

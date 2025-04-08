@@ -1,10 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'sending_emeil/base.html' %}
 
-</body>
-</html>
+{% block title %}Список пользователей{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список пользователей</h1>
+
+<ul>
+  <a class="btn btn-dark" href="{% url 'sending_emeil:sending_user_create' %}">Добавить пользователя</a>
+        {{ form.as_p }}
+        {% for sending_user in sending_users %}
+        <div class="card">
+            <div class="card-body">
+                <li class="list-group-item">
+                    Адрес почты пользователя:
+                    <a href="{% url 'sending_emeil:sending_user_detail' sending_user.pk %}">{{sending_user.email}}</a>
+                </li>
+                <li class="list-group-item">ФИО: {{sending_user.fio}}</li>
+                <li class="list-group-item">Описание: {{sending_user.description}}</li>
+            </div>
+        </div>
+        {% empty %}
+        <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
+        {% endfor %}
+</ul>
+{% endblock %}

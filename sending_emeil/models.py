@@ -31,7 +31,7 @@ class Email(models.Model):
 class Sending(models.Model):
     date_first = models.DateField(verbose_name="Дата начала")
     date_last = models.DateField(verbose_name="Дата окончания")
-    status = models.CharField(max_length=50, verbose_name="Статус")  # Добавлен max_length
+    status = models.CharField(max_length=50, verbose_name="Статус")
     mail = models.ForeignKey(
         Email,
         on_delete=models.CASCADE,
