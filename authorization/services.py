@@ -1,9 +1,12 @@
 import random
 
 
-def random_code() -> int:
-    i = random.randint(1000, 9999)
-    return i
+def random_code_generator():
+    while True:
+        yield random.randint(1000, 9999)
+
+
+gen = random_code_generator()
 
 
 

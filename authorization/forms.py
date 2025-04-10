@@ -43,19 +43,9 @@ class AuthForm(UserCreationForm):
 
 
 class CodeForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CodeForm, self).__init__(*args, **kwargs)
-        self.update_field_attributes()
+    code = forms.IntegerField(max_value=9999, min_value=1000)
 
     class Meta:
         model = Auth
         fields = ['code']
 
-    def update_field_attributes(self):
-        for field_name in self.fields:
-            self.fields[field_name].widget.attrs.update(
-                {
-                    'class': 'form-control',
-                    'placeholder': f"{self.fields[field_name].label.lower()}",
-                }
-            )
