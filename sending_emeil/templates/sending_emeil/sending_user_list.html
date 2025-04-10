@@ -8,15 +8,15 @@
 <ul>
   <a class="btn btn-dark" href="{% url 'sending_emeil:sending_user_create' %}">Добавить пользователя</a>
         {{ form.as_p }}
-        {% for sending_user in sending_users %}
+        {% for sendinguser in sendingusers %}
         <div class="card">
             <div class="card-body">
                 <li class="list-group-item">
                     Адрес почты пользователя:
-                    <a href="{% url 'sending_emeil:sending_user_detail' sending_user.pk %}">{{sending_user.email}}</a>
+                    <a href="{% url 'sending_emeil:sending_user_detail' sendinguser.pk %}">{{sendinguser.email}}</a>
                 </li>
-                <li class="list-group-item">ФИО: {{sending_user.fio}}</li>
-                <li class="list-group-item">Описание: {{sending_user.description}}</li>
+                <li class="list-group-item">ФИО: {{sendinguser.fio}}</li>
+                <li class="list-group-item">Описание: {{sendinguser.description}}</li>
             </div>
         </div>
         {% empty %}

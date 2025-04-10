@@ -16,8 +16,8 @@ urlpatterns = [
         name="sending_detail"
     ),
     path("create_sending/", views.SendingCreateView.as_view(), name="sending_create"),
-    path("update_sending/<int:pk>/", views.SendingUpdateView.as_view(), name="sending_update"),
-    path("delete_sending/<int:pk>/", views.SendingDeleteView.as_view(), name="sending_delete"),
+    path("sending_update/<int:pk>/", views.SendingUpdateView.as_view(), name="sending_update"),
+    path("sending_delete/<int:pk>/", views.SendingDeleteView.as_view(), name="sending_delete"),
     path("mail_list/", views.MailListView.as_view(), name="mail_list"),
     path(
         "mail_detail/<int:pk>/",
@@ -34,6 +34,6 @@ urlpatterns = [
         name="sending_user_detail"
     ),
     path("create_user_sending/", views.SendingUserCreateView.as_view(), name="sending_user_create"),
-    path("update_sending_user/<int:pk>/", views.SendingUserUpdateView.as_view(), name="sending_user_update"),
+    path("sending_user_update/<int:pk>/", views.SendingUserUpdateView.as_view(), name="sending_user_update"),
     path("delete_sending_user/<int:pk>/", views.SendingUserDeleteView.as_view(), name="sending_user_delete"),
     ]

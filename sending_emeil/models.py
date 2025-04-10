@@ -29,9 +29,19 @@ class Email(models.Model):
 
 
 class Sending(models.Model):
-    date_first = models.DateField(verbose_name="Дата начала")
-    date_last = models.DateField(verbose_name="Дата окончания")
-    status = models.CharField(max_length=50, verbose_name="Статус")
+    CREATED = "created"
+    STARTED = "started"
+    COMPLETED = "completed"
+
+    MAILING_STATUSES = [
+        (CREATED, "Создана"),
+        (STARTED, "Запущена"),
+        (COMPLETED, "Завершена"),
+    ]
+
+    date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
+    date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
+    status = models.CharField(max_length=10, choices=MAILING_STATUSES, default=CREATED, verbose_name="Статус")
     mail = models.ForeignKey(
         Email,
         on_delete=models.CASCADE,
@@ -57,5 +67,22 @@ class Sending(models.Model):
 
 
 class SendTry:
-    pass
+    SUCCESS = "success"
+    FAILURE = "fail"
+    CREAT = "on_stop"
+
+    send_try_status = [
+        (SUCCESS, "успешная рассылка"),
+        (FAILURE, "рассылка провалилась"),
+        (CREAT, "приостановлена (не запущена)")
+    ]
+
+    status = models.CharField(choices=send_try_status, default=CREAT, blank=True, null=True)
+    date_of_try = models.DateField(auto_now=True)
+    answer_server = models.TextField(blank=True, null=True)
+    sending = models.ForeignKey(Sending, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Попытка рассылки {self.status} {self.date_of_try}"
+
 

@@ -46,7 +46,7 @@ class SendingUpdateView(generic.UpdateView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
+            "sending_emeil:sending_update", kwargs={"pk": self.object.pk}
         )
 
 
@@ -80,7 +80,7 @@ class MailUpdateView(generic.UpdateView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
+            "sending_emeil:mail_update", kwargs={"pk": self.object.pk}
         )
 
 
@@ -88,7 +88,7 @@ class MailCreateView(generic.CreateView):
     model = models.Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_create.html"
-    success_url = "sending_emeil:mail_create"
+    success_url = reverse_lazy("sending_emeil:mail_create")
 
 
 class MailDeleteView(generic.DeleteView):
@@ -100,7 +100,7 @@ class MailDeleteView(generic.DeleteView):
 class SendingUserListView(generic.ListView):
     model = models.SendingUser
     template_name = "sending_emeil/sending_user_list.html"
-    context_object_name = "sending_users"
+    context_object_name = "sendingusers"
     success_url = reverse_lazy("sending_emeil:sending_user_list")
 
 
@@ -110,7 +110,7 @@ class SendingUserDetailView(generic.DetailView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
+            "sending_emeil:sending_user_detail", kwargs={"pk": self.object.pk}
         )
 
 

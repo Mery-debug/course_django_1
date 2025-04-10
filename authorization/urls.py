@@ -7,4 +7,6 @@ app_name = "authorization"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("access_code/", CodeDetailView.as_view(), name="access_code"),
+
     ]
