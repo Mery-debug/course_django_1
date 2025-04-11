@@ -12,7 +12,7 @@ class Auth(AbstractUser):
     phone_number = models.IntegerField(
         null=True, blank=True, help_text="Номер должен содержать только цифры"
     )
-    code = models.IntegerField(max_length=4, null=True, blank=True)
+    code = models.IntegerField(null=True, blank=True)
     is_auth = models.BooleanField(default=True, null=True, blank=True)
     is_active = models.BooleanField(default=False, null=True, blank=True)
 
@@ -29,9 +29,6 @@ class Auth(AbstractUser):
     # @property
     # def is_manag(self) -> bool:
     #     return self.groups.filter(name=MANAG_GROUP).exists()
-
-
-
 
     class Meta:
         verbose_name = 'пользователь'
