@@ -13,7 +13,7 @@
             <div class="card-body">
                 <li class="list-group-item">
                     Название рассылки:
-                    <a href="{% url 'sending_emeil:sending_detail' product.pk %}">{{sending.mail.subject}}</a>
+                    <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{sending.mail.subject}}</a>
                 </li>
                 <li class="list-group-item">Статус рассылки: {{sending.status}}</li>
                 <li class="list-group-item">Дата начала отправки: {{sending.date_first}}</li>

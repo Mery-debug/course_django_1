@@ -1,4 +1,4 @@
-from typing import re
+import re
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -8,14 +8,7 @@ from authorization.models import Auth
 
 
 class AuthForm(UserCreationForm):
-    email = forms.EmailField(unique=True, verbose_name="Адрес почты")
-    img = forms.ImageField(
-        upload_to="media/img/", blank=True, null=True, verbose_name="Изображение"
-    )
-    country = forms.CharField(null=True, blank=True, verbose_name="Страна")
-    phone_number = forms.IntegerField(
-        null=True, blank=True, help_text="Номер должен содержать только цифры"
-    )
+    email = forms.EmailField(help_text="Адрес почты")
 
     class Meta:
         model = Auth

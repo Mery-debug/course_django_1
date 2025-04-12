@@ -17,7 +17,7 @@ from sending_emeil.models import SendingUser, Sending
 code = next(random_code_generator())
 
 
-class AccessCodeView(LoginRequiredMixin, TemplateView):
+class AccessCodeView(TemplateView):
     model = Sending
     form = CodeForm
     template_name = "authorization/access_code.html"
@@ -32,9 +32,9 @@ class AccessCodeView(LoginRequiredMixin, TemplateView):
 
 
 class AuthRegister(FormView):
-    template_name = "authorization/register.html"
+    template_name = "authorization/registration.html"
     form_class = AuthForm
-    success_url = reverse_lazy("authorization:home")
+    success_url = reverse_lazy("sending_emeil:home")
 
     def form_valid(self, form):
         user = form.save()
@@ -60,6 +60,6 @@ class CustomLogoutView(TemplateView):
 
 class CustomLoginView(LoginView):
     template_name = "authorization/login.html"
-    success_url = reverse_lazy("authorization:home")
+    success_url = reverse_lazy("sending_emeil:home")
 
 

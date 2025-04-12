@@ -24,7 +24,12 @@
           </li>
         </ul>
         <form class="d-flex" role="search">
-          <a class="nav-link active" aria-current="page" href="/">Войти</a>
+          {% if not user.is_auth %}
+            <a class="nav-link active" aria-current="page" href="/authorization/login/">Войти</a>
+            <a class="nav-link active" aria-current="page" href="/authorization/registration/">Зарегистрироваться</a>
+          {% else %}
+            <a class="nav-link active" aria-current="page" href="/authorization/goodbye/">Выйти</a>
+          {% endif %}
         </form>
       </div>
     </div>
