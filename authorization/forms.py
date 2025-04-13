@@ -9,6 +9,9 @@ from authorization.models import Auth
 
 class AuthForm(UserCreationForm):
     email = forms.EmailField(help_text="Адрес почты")
+    img = forms.ImageField(required=False, help_text="Аватар")
+    phone_number = forms.IntegerField(required=False, help_text="Номер телефона")
+    country = forms.CharField(required=False, help_text="Ваша страна")
 
     class Meta:
         model = Auth

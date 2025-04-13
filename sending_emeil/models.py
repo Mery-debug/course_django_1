@@ -42,19 +42,17 @@ class Sending(models.Model):
     date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
     date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
     status = models.CharField(max_length=10, choices=MAILING_STATUSES, default=CREATED, verbose_name="Статус")
-    mail = models.ForeignKey(
+    mail = models.ManyToManyField(
         Email,
-        on_delete=models.CASCADE,
         related_name='Письма',
         blank=True,
-        null=True,
-        verbose_name="Письма"
+        null=True
     )
     users = models.ManyToManyField(
         SendingUser,
         related_name='Получатели',
         blank=True,
-        verbose_name="Получатели"
+        null=True
     )
 
     def __str__(self):
