@@ -1,9 +1,13 @@
+
+
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.mail import send_mail
-from django.shortcuts import render
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views import generic
+from django.views import generic, View
 from django.views.decorators.cache import cache_page
 
 from config.settings import EMAIL_HOST_USER
@@ -29,7 +33,7 @@ class SendingListView(generic.ListView):
     success_url = reverse_lazy("sending_emeil:sending_list")
 
 
-# @method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class SendingDetailView(generic.DetailView):
     model = Sending
     template_name = "sending_emeil/sending_detail.html"
@@ -38,15 +42,6 @@ class SendingDetailView(generic.DetailView):
         return reverse_lazy(
             "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
         )
-
-    def send_email(self):
-        recipient_list = []
-        subject = self.request.filter('subject')
-        message = self.request.filter('text')
-        from_email = EMAIL_HOST_USER
-        for user in self.request.filter('users'):
-            recipient_list.append(user)
-        send_mail(subject, message, from_email, recipient_list)
 
 
 class SendingCreateView(generic.CreateView):
@@ -169,6 +164,41 @@ class SendTryList(generic.ListView):
     template_name = "sending_emeil/statistic_list.html"
     context_object_name = "sendtries"
     success_url = reverse_lazy("sending_emeil:statistic_list")
+
+
+class SendingView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        sending = get_object_or_404(Sending, pk=pk)
+        if sending.status == Sending.COMPLETED:
+            return HttpResponseForbidden(f"Рассылка не может быть отправлена, так как её статус {sending.status}")
+        if sending.status == Sending.CREATED:
+            sending.status = Sending.STARTED
+            sending.date_of_try = timezone.now()
+            sending.save()
+            for user in sending.users.all():
+                tries = SendTry(sending=sending)
+                try:
+                    send_mail(
+                        sending.mail.subject,
+                        sending.mail.text,
+                        from_email=EMAIL_HOST_USER,
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
+                    tries.status = SendTry.SUCCESS
+                    tries.answer_server = "Письмо отправлено успешно."
+                except Exception as e:
+                    tries.status = SendTry.FAILURE
+                    tries.answer_server = str(e)
+                tries.save()
+            sending.status = Sending.COMPLETED
+            sending.end_sending = timezone.now()
+            sending.save()
+        sending_stat = SendTry.objects.filter(sending=sending)
+        return render(
+            request, "sending_emeil/statistic_list.html", {"sending": sending, "sending_try": sending_stat}
+        )
+
 
 
 

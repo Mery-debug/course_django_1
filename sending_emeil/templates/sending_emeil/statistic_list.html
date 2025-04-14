@@ -3,17 +3,13 @@
 {% block title %}Статистика по рассылкам{% endblock %}
 {% block content %}
 <ul>
-  <li class="list-group-item">Всего удачных попыток: </li>
   {% for sendtry in sendtries %}
   <div class="card">
     <div class="card-body">
-      <li class="list-group-item">
-        Название рассылки:
-        <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{sendtry.sending}}</a>
-      </li>
+      <li class="list-group-item">Тема письма рассылки: {{sendtry.sending.mail}}</li>
       <li class="list-group-item">Статус рассылки: {{sendtry.status}}</li>
       <li class="list-group-item">Дата начала отправки: {{sendtry.date_of_try}}</li>
-      <li class="list-group-item">Дата окончания отправки: {{sendtry.answer_server}}</li>
+      <li class="list-group-item">Ответ сервера: {{sendtry.answer_server}}</li>
     </div>
   </div>
   {% empty %}

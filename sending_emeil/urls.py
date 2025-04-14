@@ -4,7 +4,7 @@ from django.urls import path
 from django.views.decorators.cache import cache_page
 
 from . import views
-
+from .views import SendingView
 
 app_name = "sending_emeil"
 
@@ -37,4 +37,5 @@ urlpatterns = [
     path("sending_user_update/<int:pk>/", views.SendingUserUpdateView.as_view(), name="sending_user_update"),
     path("delete_sending_user/<int:pk>/", views.SendingUserDeleteView.as_view(), name="sending_user_delete"),
     path("statistic_list/", views.SendTryList.as_view(), name="statistic_list"),
+    path("sending_post/<int:pk>/", SendingView.as_view(), name="send_sending"),
     ]
