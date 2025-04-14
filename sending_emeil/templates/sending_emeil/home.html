@@ -7,9 +7,9 @@
     <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
     <h1 class="display-4">Список рассылок</h1>
     </div>
-    <p>Общее количество рассылок: {{}}</p>
-    <p>Активных рассылок: {{}}</p>
-    <p>Количество уникальных получателей: {{}}</p>
+    <p>Общее количество рассылок: {{ count_sending }}</p>
+    <p>Активных рассылок: {{ count_active_sending }}</p>
+    <p>Количество уникальных получателей: {{ unique_sendinguser }}</p>
 <div class="container">
     <div class="row text-center">
         <div class="col-8">

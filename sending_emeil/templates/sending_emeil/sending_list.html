@@ -3,8 +3,6 @@
 {% block title %}Рассылка{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Список рассылок</h1>
-
 <ul>
   <a class="btn btn-dark" href="{% url 'sending_emeil:sending_create' %}">Добавить рассылку</a>
         {{ form.as_p }}

@@ -13,7 +13,10 @@
             <li class="list-group-item">Дата окончания рассылки: {{ sending.date_last }}</li>
             <li class="list-group-item">Статус рассылки: {{ sending.status }}</li>
             <li class="list-group-item">Список пользователей: {{ sending.users }}</li>
-            <a href="#" class="btn btn-secondary">Отправить</a>
+            <form action="{% url 'sending_emeil:send_email' sending.pk %}" method="post">
+            {% csrf_token %}
+                <button class="btn btn-lg btn-block btn-outline-primary mt-3" type="submit">Отправить рассылку</button>
+            </form>
             <a href="{% url 'sending_emeil:sending_update' sending.pk %}" class="btn btn-secondary">Редактировать</a>
             <a href="{% url 'sending_emeil:sending_delete' sending.pk %}" class="btn btn-danger">Удалить</a>
             <a href="{% url 'sending_emeil:sending_list' %}" class="btn btn-primary">Вернуться к списку</a>

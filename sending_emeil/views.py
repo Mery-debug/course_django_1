@@ -8,22 +8,30 @@ from django.views.decorators.cache import cache_page
 
 from config.settings import EMAIL_HOST_USER
 from sending_emeil import forms, models
+from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
 
 class HomeView(generic.TemplateView):
     template_name = "sending_emeil/home.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["count_sending"] = Sending.objects.count()
+        context["count_active_sending"] = Sending.objects.filter(status="STARTED").count()
+        context["unique_sendinguser"] = SendingUser.objects.count()
+        return context
+
 
 class SendingListView(generic.ListView):
-    model = models.Sending
+    model = Sending
     template_name = "sending_emeil/sending_list.html"
     context_object_name = "sendings"
     success_url = reverse_lazy("sending_emeil:sending_list")
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+# @method_decorator(cache_page(60 * 15), name='dispatch')
 class SendingDetailView(generic.DetailView):
-    model = models.Sending
+    model = Sending
     template_name = "sending_emeil/sending_detail.html"
 
     def get_success_url(self):
@@ -42,7 +50,7 @@ class SendingDetailView(generic.DetailView):
 
 
 class SendingCreateView(generic.CreateView):
-    model = models.Sending
+    model = Sending
     form_class = forms.SendingForm
     template_name = "sending_emeil/sending_create.html"
 
@@ -52,15 +60,13 @@ class SendingCreateView(generic.CreateView):
     def form_valid(self, form):
         sending = form.save(commit=False)
         user = self.request.user
-        status = models.Sending.sending_status
         sending.owner = user
-        sending.status = status
         sending.save()
         return super().form_valid(form)
 
 
 class SendingUpdateView(generic.UpdateView):
-    model = models.Sending
+    model = Sending
     form_class = forms.SendingForm
     template_name = "sending_emeil/sending_update.html"
 
@@ -71,20 +77,20 @@ class SendingUpdateView(generic.UpdateView):
 
 
 class SendingDeleteView(generic.DeleteView):
-    model = models.Sending
+    model = Sending
     template_name = "sending_emeil/sending_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_list")
 
 
 class MailListView(generic.ListView):
-    model = models.Email
+    model = Email
     template_name = "sending_emeil/mail_list.html"
     context_object_name = "emails"
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
 class MailDetailView(generic.DetailView):
-    model = models.Email
+    model = Email
     template_name = "sending_emeil/mail_detail.html"
 
     def get_success_url(self):
@@ -94,7 +100,7 @@ class MailDetailView(generic.DetailView):
 
 
 class MailUpdateView(generic.UpdateView):
-    model = models.Email
+    model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_update.html"
 
@@ -105,27 +111,27 @@ class MailUpdateView(generic.UpdateView):
 
 
 class MailCreateView(generic.CreateView):
-    model = models.Email
+    model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_create.html"
     success_url = reverse_lazy("sending_emeil:mail_create")
 
 
 class MailDeleteView(generic.DeleteView):
-    model = models.Email
+    model = Email
     template_name = "sending_emeil/mail_delete.html"
     success_url = reverse_lazy("sending_emeil:mail_list")
 
 
 class SendingUserListView(generic.ListView):
-    model = models.SendingUser
+    model = SendingUser
     template_name = "sending_emeil/sending_user_list.html"
     context_object_name = "sendingusers"
     success_url = reverse_lazy("sending_emeil:sending_user_list")
 
 
 class SendingUserDetailView(generic.DetailView):
-    model = models.SendingUser
+    model = SendingUser
     template_name = "sending_emeil/sending_user_detail.html"
 
     def get_success_url(self):
@@ -135,14 +141,14 @@ class SendingUserDetailView(generic.DetailView):
 
 
 class SendingUserCreateView(generic.CreateView):
-    model = models.SendingUser
+    model = SendingUser
     template_name = "sending_emeil/sending_user_create.html"
     form_class = forms.SendingUserForm
     success_url = reverse_lazy("sending_emeil:sending_user_create")
 
 
 class SendingUserUpdateView(generic.UpdateView):
-    model = models.SendingUser
+    model = SendingUser
     form_class = forms.SendingUserForm
     template_name = "sending_emeil/sending_user_update.html"
 
@@ -153,14 +159,17 @@ class SendingUserUpdateView(generic.UpdateView):
 
 
 class SendingUserDeleteView(generic.DeleteView):
-    model = models.SendingUser
+    model = SendingUser
     template_name = "sending_emeil/sending_user_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_user_delete")
 
 
-class SendTry(generic.TemplateView):
-    model = models.SendTry
-    template_name = ""
+class SendTryList(generic.ListView):
+    model = SendTry
+    template_name = "sending_emeil/statistic_list.html"
+    context_object_name = "sendtries"
+    success_url = reverse_lazy("sending_emeil:statistic_list")
+
 
 
 
