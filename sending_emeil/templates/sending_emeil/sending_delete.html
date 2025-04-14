@@ -1,14 +1,14 @@
 {% extends 'sending_emeil/base.html' %}
 
-{% block title %}Удаление рассылки с темой письма {{ sending.email.subject }}{% endblock %}
+{% block title %}Удаление рассылки с темой письма {{ sending.mail.subject }}{% endblock %}
 {% block content %}
     <div class="container mt-5">
         <h1 class="mb-4">Удалить рассылку</h1>
-        <p>Вы уверены, что хотите удалить рассылку с темой письма "{{ sending.email.subject }}"?</p>
+        <p>Вы уверены, что хотите удалить рассылку с темой письма "{{ sending.mail.subject }}"?</p>
         <form method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Удалить</button>
-            <a href="{% url 'sending_emeil:sending_detail' sending.pk %}" class="btn btn-secondary">Отмена</a>
+            <a href="{% url 'sending_emeil:sending_list' %}" class="btn btn-secondary">Отмена</a>
         </form>
     </div>
 {% endblock %}

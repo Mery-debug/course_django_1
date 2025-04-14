@@ -41,7 +41,6 @@ class SendingDetailView(generic.DetailView):
         send_mail(subject, message, from_email, recipient_list)
 
 
-
 class SendingCreateView(generic.CreateView):
     model = models.Sending
     form_class = forms.SendingForm
@@ -49,6 +48,15 @@ class SendingCreateView(generic.CreateView):
 
     def get_success_url(self):
         return reverse_lazy("sending_emeil:sending_list")
+
+    def form_valid(self, form):
+        sending = form.save(commit=False)
+        user = self.request.user
+        status = models.Sending.sending_status
+        sending.owner = user
+        sending.status = status
+        sending.save()
+        return super().form_valid(form)
 
 
 class SendingUpdateView(generic.UpdateView):
@@ -64,8 +72,8 @@ class SendingUpdateView(generic.UpdateView):
 
 class SendingDeleteView(generic.DeleteView):
     model = models.Sending
+    template_name = "sending_emeil/sending_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_list")
-    context_object_name = "sendings"
 
 
 class MailListView(generic.ListView):
@@ -148,5 +156,12 @@ class SendingUserDeleteView(generic.DeleteView):
     model = models.SendingUser
     template_name = "sending_emeil/sending_user_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_user_delete")
+
+
+class SendTry(generic.TemplateView):
+    model = models.SendTry
+    template_name = ""
+
+
 
 
