@@ -4,6 +4,7 @@ from django.urls import reverse
 
 
 class Auth(AbstractUser):
+    username = models.CharField(verbose_name="Имя пользователя")
     email = models.EmailField(unique=True, verbose_name="Адрес почты")
     img = models.ImageField(
         upload_to="media/img/", blank=True, null=True, verbose_name="Изображение"
@@ -14,7 +15,7 @@ class Auth(AbstractUser):
     )
     code = models.IntegerField(null=True, blank=True)
     is_auth = models.BooleanField(default=True, null=True, blank=True)
-    is_active = models.BooleanField(default=False, null=True, blank=True)
+    is_active = models.BooleanField(default=True, null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]

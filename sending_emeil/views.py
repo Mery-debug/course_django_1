@@ -1,10 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.mail import send_mail
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.cache import cache_page
 
+from config.settings import EMAIL_HOST_USER
 from sending_emeil import forms, models
 
 
@@ -28,6 +30,16 @@ class SendingDetailView(generic.DetailView):
         return reverse_lazy(
             "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
         )
+
+    def send_email(self):
+        recipient_list = []
+        subject = self.request.filter('subject')
+        message = self.request.filter('text')
+        from_email = EMAIL_HOST_USER
+        for user in self.request.filter('users'):
+            recipient_list.append(user)
+        send_mail(subject, message, from_email, recipient_list)
+
 
 
 class SendingCreateView(generic.CreateView):

@@ -10,8 +10,8 @@ class SendingUser(models.Model):
         return f"{self.email} - {self.fio}"
 
     class Meta:
-        verbose_name = "Рассылка"
-        verbose_name_plural = "Рассылки"
+        verbose_name = "Получатель"
+        verbose_name_plural = "Получатели"
         ordering = ["email"]
 
 
@@ -42,17 +42,19 @@ class Sending(models.Model):
     date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
     date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
     status = models.CharField(max_length=10, choices=MAILING_STATUSES, default=CREATED, verbose_name="Статус")
-    mail = models.ManyToManyField(
+    mail = models.ForeignKey(
         Email,
+        on_delete=models.CASCADE,
         related_name='Письма',
         blank=True,
-        null=True
+        null=True,
+        verbose_name="Письма"
     )
     users = models.ManyToManyField(
         SendingUser,
         related_name='Получатели',
         blank=True,
-        null=True
+        verbose_name="Получатели"
     )
 
     def __str__(self):
@@ -68,11 +70,13 @@ class SendTry:
     SUCCESS = "success"
     FAILURE = "fail"
     CREAT = "on_stop"
+    STOP = "canceled"
 
     send_try_status = [
         (SUCCESS, "успешная рассылка"),
         (FAILURE, "рассылка провалилась"),
-        (CREAT, "приостановлена (не запущена)")
+        (CREAT, "приостановлена (не запущена)"),
+        (STOP, "прекращена")
     ]
 
     status = models.CharField(choices=send_try_status, default=CREAT, blank=True, null=True)

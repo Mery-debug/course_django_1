@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.utils.crypto import get_random_string
 
 from authorization.models import Auth
 
@@ -12,6 +13,7 @@ class AuthForm(UserCreationForm):
     img = forms.ImageField(required=False, help_text="Аватар")
     phone_number = forms.IntegerField(required=False, help_text="Номер телефона")
     country = forms.CharField(required=False, help_text="Ваша страна")
+    username = forms.CharField(required=True, help_text="Имя пользователя")
 
     class Meta:
         model = Auth
@@ -36,6 +38,13 @@ class AuthForm(UserCreationForm):
 
         if Auth.objects.filter(email=email).exists():
             raise ValidationError(f"Пользователь с почтой {email} уже существует.")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = f"user_{get_random_string(8)}"
+        if commit:
+            user.save()
+        return user
 
 
 class CodeForm(forms.ModelForm):
