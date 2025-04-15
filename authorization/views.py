@@ -17,34 +17,29 @@ from sending_emeil.models import SendingUser, Sending
 code = next(random_code_generator())
 
 
-class AccessCodeView(TemplateView):
-    model = Code
-    form = CodeForm
+class AccessCodeView(FormView):
     template_name = "authorization/access_code.html"
+    form_class = CodeForm
+    success_url = reverse_lazy('home')
 
-    def access_code_view(self):
-        if self.request.method == 'POST':
-            form = CodeForm(self.request.POST)
-            if form.is_valid():
-                pin = (
-                        form.cleaned_data['code']
-                )
-                if pin == code:
-                    return redirect('/sending/home/')
-                else:
-                    form.add_error(None, "Неверный код доступа")
+    def form_valid(self, form):
+        entered_code = form.cleaned_data['code']
+
+        if Code.objects.filter(code=entered_code).exists():
+            Auth.is_auth = True
+            return super().form_valid(form)
         else:
-            form = CodeForm()
-
-        return render(request, 'authorization/access_code.html', {'form': form})
+            form.add_error(None, "Неверный код доступа")
+            return self.form_invalid(form)
 
 
 class AuthRegister(FormView):
+    model = Auth
     template_name = "authorization/registration.html"
     form_class = AuthForm
 
     def get_success_url(self):
-        reverse_lazy("sending_emeil:access_code")
+        return reverse_lazy("home")
 
     def form_valid(self, form):
         user = form.save()

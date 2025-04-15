@@ -1,6 +1,7 @@
 
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
@@ -10,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.cache import cache_page
 
-from config.settings import EMAIL_HOST_USER
+from config.settings import EMAIL_HOST_USER, MANAG_GROUP
 from sending_emeil import forms, models
 from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
@@ -152,6 +153,16 @@ class SendingUserUpdateView(generic.UpdateView):
             "sending_emeil:sending_user_update", kwargs={"pk": self.object.pk}
         )
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        queryset = cache.get('published_sending')
+        if not queryset:
+            queryset = Sending.objects.filter(is_published=True)
+            cache.set('published_sending', queryset, 60 * 15)
+        return queryset
+
 
 class SendingUserDeleteView(generic.DeleteView):
     model = SendingUser
@@ -169,7 +180,7 @@ class SendTryList(generic.ListView):
 class SendingView(LoginRequiredMixin, View):
     def post(self, request, pk):
         sending = get_object_or_404(Sending, pk=pk)
-        if sending.status == Sending.COMPLETED:
+        if sending.status == Sending.STOPED:
             return HttpResponseForbidden(f"Рассылка не может быть отправлена, так как её статус {sending.status}")
         if sending.status == Sending.CREATED:
             sending.status = Sending.STARTED

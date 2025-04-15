@@ -11,16 +11,10 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         group, created = Group.objects.get_or_create(name='Manager')
 
-        can_unpublish_product = Permission.objects.get(
+        can_unpublish_sending = Permission.objects.get(
             codename='can_unpublish_sending',
             content_type__app_label='sending_emeil',
             content_type__model='sending'
         )
 
-        delete_product = Permission.objects.get(
-            codename='delete_sending',
-            content_type__app_label='sending_emeil',
-            content_type__model='sending'
-        )
-
-        group.permissions.add(can_unpublish_sending, delete_sending)
+        group.permissions.add(can_unpublish_sending)

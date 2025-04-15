@@ -14,7 +14,7 @@ class Auth(AbstractUser):
         null=True, blank=True, help_text="Номер должен содержать только цифры"
     )
     code = models.IntegerField(null=True, blank=True)
-    is_auth = models.BooleanField(default=True, null=True, blank=True)
+    is_auth = models.BooleanField(default=False, null=True, blank=True)
     is_active = models.BooleanField(default=True, null=True, blank=True)
 
     USERNAME_FIELD = "email"
@@ -38,7 +38,7 @@ class Auth(AbstractUser):
 
 
 class Code(models.Model):
-    code = models.IntegerField(help_text="Код из сообщения")
+    code = models.CharField(unique=True, help_text="Код из сообщения")
 
     def __str__(self):
         return self.code

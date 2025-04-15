@@ -11,7 +11,13 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("access_code/", AccessCodeView.as_view(), name="access_code"),
     path("login/", CustomLoginView.as_view(), name="login"),
-    path("logout/", CustomLogoutView.as_view(), name="logout"),
+    path(
+        "logout/", LogoutView.as_view(next_page="authorization:goodbye"), name="logout"
+    ),
+    path(
+        "goodbye/",
+        CustomLogoutView.as_view(template_name="authorization/goodbye.html"),
+        name="goodbye",
+    ),
     path("registration/", AuthRegister.as_view(), name="registration"),
-    path("goodbye/", CustomLogoutView.as_view(), name="goodbye"),
     ]

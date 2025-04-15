@@ -1,10 +1,10 @@
 <header>
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Рассылка</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Рассылка</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-        </button>
+      </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
@@ -23,18 +23,17 @@
             </ul>
           </li>
         </ul>
-        <form class="d-flex" role="search">
+        <div class="d-flex align-items-center">
           {% if user.is_active %}
-          <form method="post" action="{% url 'authorization:goodbye' %}" style="display: inline;">
+        <form method="post" action="{% url 'authorization:logout' %}" style="display: inline;">
           {% csrf_token %}
-            <a href="/sending/home/"><button class="p-2 btn btn-outline-primary" type="submit">Выйти</button></a>
-            <p>Добро пожаловать, {{ user.email }}!</p>
-          </form>
-            {% else %}
-            <a class="p-2 btn btn-outline-primary" aria-current="page" href="/authorization/login/">Войти</a>
-            <a class="p-2 btn btn-outline-primary" aria-current="page" href="/authorization/registration/">Зарегистрироваться</a>
-          {% endif %}
+          <a href="/authorization/product_list/"><button class="p-2 btn btn-outline-primary" type="submit">Выйти</button></a>
         </form>
+      {% else %}
+        <a href="{% url 'authorization:login' %}"><button class="p-2 btn btn-outline-primary" type="submit">Войти</button></a>
+        <a href="{% url 'authorization:registration' %}"><button class="p-2 btn btn-outline-primary" type="submit">Регистрация</button></a>
+      {% endif %}
+        </div>
       </div>
     </div>
   </nav>

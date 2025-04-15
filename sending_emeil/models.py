@@ -34,17 +34,19 @@ class Sending(models.Model):
     CREATED = "created"
     STARTED = "started"
     COMPLETED = "completed"
+    STOPED = "stoped"
 
     sending_status = [
         (CREATED, "Создана"),
         (STARTED, "Запущена"),
         (COMPLETED, "Завершена"),
+        (STOPED, "Остановлена менеджером")
     ]
 
     date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
     date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
-    # owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель рассылки")
-    # is_publish = models.BooleanField(default=True, verbose_name="Можно запустить")
+    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель рассылки")
+    is_publish = models.BooleanField(default=True, verbose_name="Можно запустить")
     status = models.CharField(choices=sending_status, default=CREATED, verbose_name="Статус")
     mail = models.ForeignKey(
         Email,
