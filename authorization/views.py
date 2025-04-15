@@ -3,13 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 
 from authorization.forms import CodeForm, AuthForm
-from authorization.models import Auth
+from authorization.models import Auth, Code
 from authorization.services import random_code_generator
 from config.settings import EMAIL_HOST_USER
 from sending_emeil.models import SendingUser, Sending
@@ -18,23 +18,33 @@ code = next(random_code_generator())
 
 
 class AccessCodeView(TemplateView):
-    model = Sending
+    model = Code
     form = CodeForm
     template_name = "authorization/access_code.html"
 
-    def get_success_url(self):
-        code_user = self.request.code
-        if code_user == code:
-            Auth.is_active = True
-            return reverse_lazy("sending_emeil:home")
-        Auth.is_active = False
-        raise ValidationError("Вы ввели не верный код")
+    def access_code_view(self):
+        if self.request.method == 'POST':
+            form = CodeForm(self.request.POST)
+            if form.is_valid():
+                pin = (
+                        form.cleaned_data['code']
+                )
+                if pin == code:
+                    return redirect('/sending/home/')
+                else:
+                    form.add_error(None, "Неверный код доступа")
+        else:
+            form = CodeForm()
+
+        return render(request, 'authorization/access_code.html', {'form': form})
 
 
 class AuthRegister(FormView):
     template_name = "authorization/registration.html"
     form_class = AuthForm
-    success_url = reverse_lazy("sending_emeil:home")
+
+    def get_success_url(self):
+        reverse_lazy("sending_emeil:access_code")
 
     def form_valid(self, form):
         user = form.save()

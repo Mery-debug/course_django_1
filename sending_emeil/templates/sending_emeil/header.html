@@ -24,11 +24,15 @@
           </li>
         </ul>
         <form class="d-flex" role="search">
-          {% if not user.is_auth %}
-            <a class="nav-link active" aria-current="page" href="/authorization/login/">Войти</a>
-            <a class="nav-link active" aria-current="page" href="/authorization/registration/">Зарегистрироваться</a>
-          {% else %}
-            <a class="nav-link active" aria-current="page" href="/authorization/goodbye/">Выйти</a>
+          {% if user.is_active %}
+          <form method="post" action="{% url 'authorization:goodbye' %}" style="display: inline;">
+          {% csrf_token %}
+            <a href="/sending/home/"><button class="p-2 btn btn-outline-primary" type="submit">Выйти</button></a>
+            <p>Добро пожаловать, {{ user.email }}!</p>
+          </form>
+            {% else %}
+            <a class="p-2 btn btn-outline-primary" aria-current="page" href="/authorization/login/">Войти</a>
+            <a class="p-2 btn btn-outline-primary" aria-current="page" href="/authorization/registration/">Зарегистрироваться</a>
           {% endif %}
         </form>
       </div>

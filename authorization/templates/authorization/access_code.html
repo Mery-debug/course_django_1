@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'sending_emeil/base.html' %}
 
-</body>
-</html>
+{% block title %}Код подтверждения адреса почты{% endblock %}
+
+{% block content %}
+    <h2>Вы успешно зарегистрировались</h2>
+    <form method="post">
+    {% csrf_token %}
+    {{ form.code }}
+    <button type="submit">Подтвердить</button>
+</form>
+{% endblock %}

@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.utils.crypto import get_random_string
 
-from authorization.models import Auth
+from authorization.models import Auth, Code
 
 
 class AuthForm(UserCreationForm):
@@ -47,10 +47,27 @@ class AuthForm(UserCreationForm):
         return user
 
 
-class CodeForm(forms.ModelForm):
-    code = forms.IntegerField(max_value=9999, min_value=1000)
+class CodeForm(forms.Form):
+    code = forms.CharField(
+        max_length=4,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите 4-значный код',
+            'pattern': '[0-9]{4}',
+            'inputmode': 'numeric'
+        }),
+        label='Код подтверждения'
+    )
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        if not code.isdigit():
+            raise forms.ValidationError("Код должен содержать только цифры")
+        if len(code) != 4:
+            raise forms.ValidationError("Код должен содержать 4 цифры")
+        return code
 
     class Meta:
-        model = Auth
+        model = Code
         fields = ['code']
 

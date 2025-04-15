@@ -37,3 +37,13 @@ class Auth(AbstractUser):
         ordering = ['email']
 
 
+class Code(models.Model):
+    code = models.IntegerField(help_text="Код из сообщения")
+
+    def __str__(self):
+        return self.code
+
+    class Meta:
+        verbose_name = 'код подтверждения'
+        verbose_name_plural = 'коды подтверждения'
+        ordering = ['code']
