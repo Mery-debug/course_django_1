@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 
+from config.settings import MANAG_GROUP
+
 
 class Auth(AbstractUser):
     username = models.CharField(verbose_name="Имя пользователя")
@@ -27,9 +29,9 @@ class Auth(AbstractUser):
         self.is_active = True
         return reverse("authorization:access_code")
 
-    # @property
-    # def is_manag(self) -> bool:
-    #     return self.groups.filter(name=MANAG_GROUP).exists()
+    @property
+    def is_manag(self) -> bool:
+        return self.groups.filter(name=MANAG_GROUP).exists()
 
     class Meta:
         verbose_name = 'пользователь'

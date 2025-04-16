@@ -10,13 +10,15 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic, View
 from django.views.decorators.cache import cache_page
+from django.views.generic import ListView, TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
 from config.settings import EMAIL_HOST_USER, MANAG_GROUP
 from sending_emeil import forms, models
+from sending_emeil.forms import SendingForm
 from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
 
-class HomeView(generic.TemplateView):
+class HomeView(LoginRequiredMixin, TemplateView):
     template_name = "sending_emeil/home.html"
 
     def get_context_data(self, **kwargs):
@@ -27,15 +29,25 @@ class HomeView(generic.TemplateView):
         return context
 
 
-class SendingListView(generic.ListView):
+class SendingListView(ListView):
     model = Sending
     template_name = "sending_emeil/sending_list.html"
     context_object_name = "sendings"
     success_url = reverse_lazy("sending_emeil:sending_list")
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        queryset = cache.get('publish_sendings')
+        if not queryset:
+            queryset = Sending.objects.filter(is_publish=True)
+            cache.set('publish_sendings', queryset, 60 * 15)
+        return queryset
+
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
-class SendingDetailView(generic.DetailView):
+class SendingDetailView(LoginRequiredMixin, DetailView):
     model = Sending
     template_name = "sending_emeil/sending_detail.html"
 
@@ -44,8 +56,20 @@ class SendingDetailView(generic.DetailView):
             "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
         )
 
+    def get_form_class(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return SendingManagerForm
+        return SendingForm
 
-class SendingCreateView(generic.CreateView):
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        return Sending.objects.filter(is_published=True)
+
+
+class SendingCreateView(LoginRequiredMixin, CreateView):
     model = Sending
     form_class = forms.SendingForm
     template_name = "sending_emeil/sending_create.html"
@@ -61,7 +85,7 @@ class SendingCreateView(generic.CreateView):
         return super().form_valid(form)
 
 
-class SendingUpdateView(generic.UpdateView):
+class SendingUpdateView(LoginRequiredMixin, UpdateView):
     model = Sending
     form_class = forms.SendingForm
     template_name = "sending_emeil/sending_update.html"
@@ -72,20 +96,20 @@ class SendingUpdateView(generic.UpdateView):
         )
 
 
-class SendingDeleteView(generic.DeleteView):
+class SendingDeleteView(LoginRequiredMixin, DeleteView):
     model = Sending
     template_name = "sending_emeil/sending_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_list")
 
 
-class MailListView(generic.ListView):
+class MailListView(ListView):
     model = Email
     template_name = "sending_emeil/mail_list.html"
     context_object_name = "emails"
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
-class MailDetailView(generic.DetailView):
+class MailDetailView(LoginRequiredMixin, DetailView):
     model = Email
     template_name = "sending_emeil/mail_detail.html"
 
@@ -95,7 +119,7 @@ class MailDetailView(generic.DetailView):
         )
 
 
-class MailUpdateView(generic.UpdateView):
+class MailUpdateView(LoginRequiredMixin, UpdateView):
     model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_update.html"
@@ -106,27 +130,27 @@ class MailUpdateView(generic.UpdateView):
         )
 
 
-class MailCreateView(generic.CreateView):
+class MailCreateView(LoginRequiredMixin, CreateView):
     model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_create.html"
     success_url = reverse_lazy("sending_emeil:mail_create")
 
 
-class MailDeleteView(generic.DeleteView):
+class MailDeleteView(LoginRequiredMixin, DeleteView):
     model = Email
     template_name = "sending_emeil/mail_delete.html"
     success_url = reverse_lazy("sending_emeil:mail_list")
 
 
-class SendingUserListView(generic.ListView):
+class SendingUserListView(ListView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_list.html"
     context_object_name = "sendingusers"
     success_url = reverse_lazy("sending_emeil:sending_user_list")
 
 
-class SendingUserDetailView(generic.DetailView):
+class SendingUserDetailView(LoginRequiredMixin, DetailView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_detail.html"
 
@@ -136,14 +160,14 @@ class SendingUserDetailView(generic.DetailView):
         )
 
 
-class SendingUserCreateView(generic.CreateView):
+class SendingUserCreateView(LoginRequiredMixin, CreateView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_create.html"
     form_class = forms.SendingUserForm
     success_url = reverse_lazy("sending_emeil:sending_user_create")
 
 
-class SendingUserUpdateView(generic.UpdateView):
+class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
     model = SendingUser
     form_class = forms.SendingUserForm
     template_name = "sending_emeil/sending_user_update.html"
@@ -164,13 +188,13 @@ class SendingUserUpdateView(generic.UpdateView):
         return queryset
 
 
-class SendingUserDeleteView(generic.DeleteView):
+class SendingUserDeleteView(LoginRequiredMixin, DeleteView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_delete.html"
     success_url = reverse_lazy("sending_emeil:sending_user_delete")
 
 
-class SendTryList(generic.ListView):
+class SendTryList(LoginRequiredMixin, ListView):
     model = SendTry
     template_name = "sending_emeil/statistic_list.html"
     context_object_name = "sendtries"

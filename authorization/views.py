@@ -39,7 +39,7 @@ class AuthRegister(FormView):
     form_class = AuthForm
 
     def get_success_url(self):
-        return reverse_lazy("home")
+        return reverse_lazy("auth:access_code")
 
     def form_valid(self, form):
         user = form.save()
@@ -57,7 +57,7 @@ class AuthRegister(FormView):
 
 class CustomLogoutView(TemplateView):
     template_name = "authorization/goodbye.html"
-    success_url = reverse_lazy("authorization:goodbye")
+    success_url = reverse_lazy("auth:goodbye")
 
     def get_success_url(self):
         return render(request, "authorization/goodbye.html")
@@ -65,6 +65,6 @@ class CustomLogoutView(TemplateView):
 
 class CustomLoginView(LoginView):
     template_name = "authorization/login.html"
-    success_url = reverse_lazy("sending_emeil:home")
+    success_url = reverse_lazy("home")
 
 

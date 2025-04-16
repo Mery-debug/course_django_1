@@ -4,7 +4,8 @@
 
 {% block content %}
 <ul>
-  <a class="btn btn-dark" href="{% url 'sending_emeil:sending_create' %}">Добавить рассылку</a>
+    {% if not user.is_manag or user.is_active %}
+         <a class="btn btn-dark" href="{% url 'sending_emeil:sending_create' %}">Добавить рассылку</a>
         {{ form.as_p }}
         {% for sending in sendings %}
         <div class="card">
@@ -21,5 +22,23 @@
         {% empty %}
         <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
         {% endfor %}
+    {% else %}
+        {{ form.as_p }}
+        {% for sending in sendings %}
+        <div class="card">
+            <div class="card-body">
+                <li class="list-group-item">
+                    Название рассылки:
+                    <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{sending.mail.subject}}</a>
+                </li>
+                <li class="list-group-item">Статус рассылки: {{sending.status}}</li>
+                <li class="list-group-item">Дата начала отправки: {{sending.date_first}}</li>
+                <li class="list-group-item">Дата окончания отправки: {{sending.date_last}}</li>
+            </div>
+        </div>
+        {% empty %}
+        <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
+        {% endfor %}
+    {% endif %}
 </ul>
 {% endblock %}

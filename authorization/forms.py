@@ -50,13 +50,14 @@ class AuthForm(UserCreationForm):
 class CodeForm(forms.Form):
     code = forms.CharField(
         max_length=4,
+        min_length=4,
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите 4-значный код',
+            'class': 'digit-input',
             'pattern': '[0-9]{4}',
-            'inputmode': 'numeric'
+            'placeholder': '••••'
         }),
-        label='Код подтверждения'
+        label='Код подтверждения',
+        help_text='Введите 4-значный код из приветственного письма'
     )
 
     def clean_code(self):

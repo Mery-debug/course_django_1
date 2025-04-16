@@ -4,6 +4,6 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <a href="{% url 'authorization:access_code' %}"><button type="submit">Зарегистрироваться</button></a>
+    <a href="{% url 'auth:access_code' %}"><button type="submit">Зарегистрироваться</button></a>
   </form>
 {% endblock %}
