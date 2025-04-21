@@ -3,7 +3,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 from django.views.decorators.cache import cache_page
 
-from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView
+from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView, ChangePasswordView, \
+    SendEmailView
 
 app_name = "authorization"
 
@@ -14,6 +15,8 @@ urlpatterns = [
     path(
         "logout/", LogoutView.as_view(next_page="authorization:goodbye"), name="logout"
     ),
+    path("send_email/", SendEmailView.as_view(), name="send_email"),
+    path("change_password/", ChangePasswordView.as_view(), name="change_password"),
     path(
         "goodbye/",
         CustomLogoutView.as_view(template_name="authorization/goodbye.html"),

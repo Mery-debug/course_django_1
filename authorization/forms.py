@@ -72,3 +72,28 @@ class CodeForm(forms.Form):
         model = Code
         fields = ['code']
 
+
+class ChangePasswordForm(UserCreationForm):
+    class Meta:
+        model = Auth
+        fields = ["password1", "password2"]
+
+
+class EmailForm(forms.Form):
+    email = forms.EmailField(help_text="Адрес почты")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+
+        if Auth.objects.filter(email=email).exists():
+            return email
+        raise ValidationError(f"Пользователь с почтой {email} не существует. "
+                              f"Введите почту, которую вы использовали при регистрации на сайте")
+
+    class Meta:
+        model = Auth
+        fields = ["email"]
+
+
+

@@ -8,11 +8,12 @@ from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 
-from authorization.forms import CodeForm, AuthForm
+from authorization.forms import CodeForm, AuthForm, ChangePasswordForm, EmailForm
 from authorization.models import Auth, Code
 from authorization.services import random_code_generator
 from config.settings import EMAIL_HOST_USER
 from sending_emeil.models import SendingUser, Sending
+import secrets
 
 code = next(random_code_generator())
 
@@ -73,5 +74,34 @@ class CustomLogoutView(TemplateView):
 class CustomLoginView(LoginView):
     template_name = "authorization/login.html"
     success_url = reverse_lazy("home")
+
+
+class SendEmailView(FormView):
+    model = Auth
+    form_class = EmailForm
+    template_name = "authorization/email_for_change_password.html"
+    success_url = reverse_lazy("home")
+
+    def send_email(self, form):
+        user = form.save()
+        token = secrets.token_hex(16)
+        user.token = token
+        user.save()
+        host = self.request.get_host()
+        url = f"http://{host}/authorization/change_password/{token}/"
+        send_mail(
+            subject="Подтверждение почты",
+            message=f"Привет, перейди по ссылке для смены пароля {url}",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+        return super().form_valid(form)
+
+
+class ChangePasswordView(FormView):
+    template_name = "change_password.html"
+    form_class = EmailForm
+    success_url = reverse_lazy("home")
+
 
 
