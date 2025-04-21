@@ -9,14 +9,13 @@ from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, C
 app_name = "authorization"
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("access_code/", AccessCodeView.as_view(), name="access_code"),
     path("login/", CustomLoginView.as_view(), name="login"),
     path(
         "logout/", LogoutView.as_view(next_page="authorization:goodbye"), name="logout"
     ),
-    path("send_email/", SendEmailView.as_view(), name="send_email"),
-    path("change_password/", ChangePasswordView.as_view(), name="change_password"),
+    path("change_password/<str:token>/", SendEmailView.as_view(), name="change_password"),
+    path("email_for_change_password/", ChangePasswordView.as_view(), name="email_for_change_password"),
     path(
         "goodbye/",
         CustomLogoutView.as_view(template_name="authorization/goodbye.html"),

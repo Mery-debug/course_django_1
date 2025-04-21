@@ -9,7 +9,7 @@ from authorization.models import Auth, Code
 
 
 class AuthForm(UserCreationForm):
-    email = forms.EmailField(help_text="Адрес почты")
+    email_address = forms.EmailField(help_text="Адрес почты")
     img = forms.ImageField(required=False, help_text="Аватар")
     phone_number = forms.IntegerField(required=False, help_text="Номер телефона")
     country = forms.CharField(required=False, help_text="Ваша страна")
@@ -17,7 +17,7 @@ class AuthForm(UserCreationForm):
 
     class Meta:
         model = Auth
-        fields = ["email", "password1", "password2"]
+        fields = ["email_address", "password1", "password2"]
 
     def clean_phone_number(self):
         phone_number = self.cleaned_data.get("phone_number")
@@ -26,18 +26,18 @@ class AuthForm(UserCreationForm):
         return phone_number
 
     def clean_email(self):
-        email = self.cleaned_data.get("email")
+        email_address = self.cleaned_data.get("email")
         email_pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
-        if not re.match(email_pattern, email):
+        if not re.match(email_pattern, email_address):
             raise forms.ValidationError("Почта должна быть вида user@example.ru")
-        return email
+        return email_address
 
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get("email")
+        email_address = cleaned_data.get("email_address")
 
-        if Auth.objects.filter(email=email).exists():
-            raise ValidationError(f"Пользователь с почтой {email} уже существует.")
+        if Auth.objects.filter(email=email_address).exists():
+            raise ValidationError(f"Пользователь с почтой {email_address} уже существует.")
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -80,20 +80,20 @@ class ChangePasswordForm(UserCreationForm):
 
 
 class EmailForm(forms.Form):
-    email = forms.EmailField(help_text="Адрес почты")
+    email_address = forms.EmailField(help_text="Адрес почты")
 
     def clean(self):
         cleaned_data = super().clean()
-        email = cleaned_data.get("email")
+        email_address = cleaned_data.get("email_address")
 
-        if Auth.objects.filter(email=email).exists():
-            return email
-        raise ValidationError(f"Пользователь с почтой {email} не существует. "
+        if Auth.objects.filter(email=email_address).exists():
+            return email_address
+        raise ValidationError(f"Пользователь с почтой {email_address} не существует. "
                               f"Введите почту, которую вы использовали при регистрации на сайте")
 
     class Meta:
         model = Auth
-        fields = ["email"]
+        fields = ["email_address"]
 
 
 

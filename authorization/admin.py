@@ -5,6 +5,6 @@ from authorization.models import Auth
 
 @admin.register(Auth)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("email", "username")
-    list_filter = ("email",)
-    search_fields = ("email",)
+    list_display = ("email_address", "username")
+    list_filter = ("email_address",)
+    search_fields = ("email_address",)

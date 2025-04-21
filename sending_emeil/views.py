@@ -67,7 +67,7 @@ class SendingDetailView(DetailView):
         user = self.request.user
         if user.groups.filter(name=MANAG_GROUP).exists():
             return Sending.objects.all()
-        return Sending.objects.filter(is_published=True)
+        return Sending.objects.filter(is_publish=True)
 
 
 class SendingCreateView(LoginRequiredMixin, CreateView):
@@ -93,7 +93,7 @@ class SendingUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "sending_emeil:sending_update", kwargs={"pk": self.object.pk}
+            "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
         )
 
 
@@ -127,7 +127,7 @@ class MailUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse_lazy(
-            "sending_emeil:mail_update", kwargs={"pk": self.object.pk}
+            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
         )
 
 
@@ -135,7 +135,11 @@ class MailCreateView(LoginRequiredMixin, CreateView):
     model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_create.html"
-    success_url = reverse_lazy("sending_emeil:mail_create")
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
+        )
 
     def form_valid(self, form):
         mail = form.save(commit=False)
@@ -219,7 +223,7 @@ class SendTryList(ListView):
 class SendingView(LoginRequiredMixin, View):
     def post(self, request, pk):
         sending = get_object_or_404(Sending, pk=pk)
-        if sending.status == Sending.STOPED:
+        if sending.status == Sending.STOPPED:
             return HttpResponseForbidden(f"Рассылка не может быть отправлена, так как её статус {sending.status}")
         if sending.status == Sending.CREATED:
             sending.status = Sending.STARTED

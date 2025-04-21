@@ -45,7 +45,7 @@ class AuthRegister(FormView):
     def form_valid(self, form):
         user = form.save()
         login(self.request, user)
-        self.send_welcome_email(user.email)
+        self.send_welcome_email(user.email_address)
         return super().form_valid(form)
 
     def send_welcome_email(self, user_email):
@@ -80,7 +80,7 @@ class SendEmailView(FormView):
     model = Auth
     form_class = EmailForm
     template_name = "authorization/email_for_change_password.html"
-    success_url = reverse_lazy("home")
+    success_url = reverse_lazy("authorization:change_password")
 
     def send_email(self, form):
         user = form.save()
@@ -93,13 +93,13 @@ class SendEmailView(FormView):
             subject="Подтверждение почты",
             message=f"Привет, перейди по ссылке для смены пароля {url}",
             from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email],
+            recipient_list=[user.email_address],
         )
         return super().form_valid(form)
 
 
 class ChangePasswordView(FormView):
-    template_name = "change_password.html"
+    template_name = "authorization/change_password.html"
     form_class = EmailForm
     success_url = reverse_lazy("home")
 

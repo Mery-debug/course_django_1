@@ -12,7 +12,7 @@
             <li class="list-group-item">Дата начала рассылки: {{ sending.date_first }}</li>
             <li class="list-group-item">Дата окончания рассылки: {{ sending.date_last }}</li>
             <li class="list-group-item">Статус рассылки: {{ sending.status }}</li>
-            <li class="list-group-item">Список пользователей: {{ sending.users }}</li>
+            <li class="list-group-item">Список пользователей: {{ sending.email }}</li>
             <form action="{% url 'sending_emeil:send_sending' sending.pk %}" method="post">
             {% csrf_token %}
                 <button class="btn btn-secondary" type="submit">Отправить рассылку</button>

@@ -1,13 +1,14 @@
 from django.db import models
 
 from authorization.models import Auth
+from config import settings
 
 
 class SendingUser(models.Model):
     email = models.EmailField(unique=True)
     fio = models.CharField(blank=True, null=True)
     description = models.CharField(blank=True, null=True)
-    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель пользователя")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_users')
 
     def __str__(self):
         return f"{self.email} - {self.fio}"
@@ -21,7 +22,7 @@ class SendingUser(models.Model):
 class Email(models.Model):
     subject = models.CharField(max_length=100, verbose_name="Тема письма")
     text = models.TextField(max_length=1500, verbose_name="Текст письма")
-    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель письма")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_emails')
 
     def __str__(self):
         return self.subject
@@ -36,31 +37,53 @@ class Sending(models.Model):
     CREATED = "created"
     STARTED = "started"
     COMPLETED = "completed"
-    STOPED = "stoped"
+    STOPPED = "stopped"
 
-    sending_status = [
+    STATUS_CHOICES = [
         (CREATED, "Создана"),
         (STARTED, "Запущена"),
         (COMPLETED, "Завершена"),
-        (STOPED, "Остановлена менеджером")
+        (STOPPED, "Остановлена менеджером")
     ]
 
-    date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
-    date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
-    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель рассылки")
-    is_publish = models.BooleanField(default=True, verbose_name="Можно запустить")
-    status = models.CharField(choices=sending_status, default=CREATED, verbose_name="Статус")
+    date_first = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Дата начала"
+    )
+    date_last = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name="Дата окончания"
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='owned_emails'
+    )
+    is_publish = models.BooleanField(
+        default=True,
+        verbose_name="Можно запустить"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=CREATED,
+        verbose_name="Статус"
+    )
     mail = models.ForeignKey(
         Email,
         on_delete=models.CASCADE,
-        related_name='Письма',
+        related_name='mail_sendings',
         blank=True,
         null=True,
+        verbose_name="Письмо"
     )
     users = models.ManyToManyField(
         SendingUser,
-        related_name='Получатели',
+        related_name='user_sendings',
         blank=True,
+        verbose_name="Получатели"
     )
 
     def __str__(self):
