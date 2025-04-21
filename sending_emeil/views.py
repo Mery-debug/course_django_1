@@ -137,6 +137,13 @@ class MailCreateView(LoginRequiredMixin, CreateView):
     template_name = "sending_emeil/mail_create.html"
     success_url = reverse_lazy("sending_emeil:mail_create")
 
+    def form_valid(self, form):
+        mail = form.save(commit=False)
+        user = self.request.user
+        mail.owner = user
+        mail.save()
+        return super().form_valid(form)
+
 
 class MailDeleteView(LoginRequiredMixin, DeleteView):
     model = Email
@@ -166,6 +173,13 @@ class SendingUserCreateView(LoginRequiredMixin, CreateView):
     template_name = "sending_emeil/sending_user_create.html"
     form_class = forms.SendingUserForm
     success_url = reverse_lazy("sending_emeil:sending_user_list")
+
+    def form_valid(self, form):
+        sending_user = form.save(commit=False)
+        user = self.request.user
+        sending_user.owner = user
+        sending_user.save()
+        return super().form_valid(form)
 
 
 class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
