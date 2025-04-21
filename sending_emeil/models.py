@@ -7,6 +7,7 @@ class SendingUser(models.Model):
     email = models.EmailField(unique=True)
     fio = models.CharField(blank=True, null=True)
     description = models.CharField(blank=True, null=True)
+    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель пользователя")
 
     def __str__(self):
         return f"{self.email} - {self.fio}"
@@ -20,6 +21,7 @@ class SendingUser(models.Model):
 class Email(models.Model):
     subject = models.CharField(max_length=100, verbose_name="Тема письма")
     text = models.TextField(max_length=1500, verbose_name="Текст письма")
+    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель письма")
 
     def __str__(self):
         return self.subject
@@ -45,7 +47,7 @@ class Sending(models.Model):
 
     date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
     date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
-    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Создатель рассылки")
+    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель рассылки")
     is_publish = models.BooleanField(default=True, verbose_name="Можно запустить")
     status = models.CharField(choices=sending_status, default=CREATED, verbose_name="Статус")
     mail = models.ForeignKey(
