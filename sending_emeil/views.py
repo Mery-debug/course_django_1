@@ -70,7 +70,7 @@ class SendingDetailView(DetailView):
         return Sending.objects.filter(is_publish=True)
 
 
-class SendingCreateView(LoginRequiredMixin, CreateView):
+class SendingCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     model = Sending
     form_class = forms.SendingForm
     template_name = "sending_emeil/sending_create.html"
@@ -85,6 +85,10 @@ class SendingCreateView(LoginRequiredMixin, CreateView):
         sending.save()
         return super().form_valid(form)
 
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
+
 
 class SendingUpdateView(LoginRequiredMixin, UpdateView):
     model = Sending
@@ -95,6 +99,12 @@ class SendingUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy(
             "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
         )
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        return Sending.objects.filter(is_publish=True)
 
 
 class SendingDeleteView(LoginRequiredMixin, DeleteView):
@@ -130,8 +140,14 @@ class MailUpdateView(LoginRequiredMixin, UpdateView):
             "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
         )
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Email.objects.all()
+        return Email.objects.filter(is_publish=True)
 
-class MailCreateView(LoginRequiredMixin, CreateView):
+
+class MailCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     model = Email
     form_class = forms.EmailForm
     template_name = "sending_emeil/mail_create.html"
@@ -147,6 +163,10 @@ class MailCreateView(LoginRequiredMixin, CreateView):
         mail.owner = user
         mail.save()
         return super().form_valid(form)
+
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
 
 
 class MailDeleteView(LoginRequiredMixin, DeleteView):
@@ -185,8 +205,12 @@ class SendingUserCreateView(LoginRequiredMixin, CreateView):
         sending_user.save()
         return super().form_valid(form)
 
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
 
-class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
+
+class SendingUserUpdateView(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
     model = SendingUser
     form_class = forms.SendingUserForm
     template_name = "sending_emeil/sending_user_update.html"
@@ -199,11 +223,11 @@ class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         user = self.request.user
         if user.groups.filter(name=MANAG_GROUP).exists():
-            return Sending.objects.all()
-        queryset = cache.get('published_sending')
+            return SendingUser.objects.all()
+        queryset = cache.get('published_sending_user')
         if not queryset:
-            queryset = Sending.objects.filter(is_published=True)
-            cache.set('published_sending', queryset, 60 * 15)
+            queryset = SendingUser.objects.filter(is_publish=True)
+            cache.set('published_sending_user', queryset, 60 * 15)
         return queryset
 
 

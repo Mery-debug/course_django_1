@@ -6,7 +6,9 @@
 <h1 class="mb-4">Список писем</h1>
 
 <ul>
+    {% if user.is_auth or user.is_active %}
   <a class="btn btn-dark" href="{% url 'sending_emeil:mail_create' %}">Добавить письмо</a>
+    {% elif user.is_manag %}
     {% for email in emails %}
         <div class="card">
             <div class="card-body">
@@ -20,5 +22,6 @@
     {% empty %}
         <li>У вас не создано ни одного письма, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
     {% endfor %}
+    {% endif %}
 </ul>
 {% endblock %}

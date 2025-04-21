@@ -9,6 +9,9 @@ class SendingUser(models.Model):
     fio = models.CharField(blank=True, null=True)
     description = models.CharField(blank=True, null=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_users')
+    is_publish = models.BooleanField(
+        default=True
+    )
 
     def __str__(self):
         return f"{self.email} - {self.fio}"
@@ -23,6 +26,9 @@ class Email(models.Model):
     subject = models.CharField(max_length=100, verbose_name="Тема письма")
     text = models.TextField(max_length=1500, verbose_name="Текст письма")
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_emails')
+    is_publish = models.BooleanField(
+        default=True
+    )
 
     def __str__(self):
         return self.subject
