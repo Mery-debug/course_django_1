@@ -54,21 +54,24 @@ class SendingUserForm(forms.ModelForm):
             )
 
 
-# class SendingManagerForm(forms.ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super(SendingManagerForm, self).__init__(*args, **kwargs)
-#         self.update_field_attributes()
-#
-#     class Meta:
-#         model = Sending
-#         fields = ['is_publish']
-#
-#     def update_field_attributes(self):
-#         for field_name in self.fields:
-#             self.fields[field_name].widget.attrs.update(
-#                 {
-#                     "class": "checkbox",
-#                     "placeholder": f"Введите {self.fields[field_name].label.lower()}",
-#                 }
-#             )
+class SendingManagerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingManagerForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = Sending
+        fields = ['is_publish']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "checkbox",
+                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+
 

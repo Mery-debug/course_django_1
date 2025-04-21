@@ -45,7 +45,7 @@ class Sending(models.Model):
 
     date_first = models.DateField(blank=True, null=True, verbose_name="Дата начала")
     date_last = models.DateField(blank=True, null=True, verbose_name="Дата окончания")
-    # owner = models.ForeignKey(Auth, on_delete=models.CASCADE, verbose_name="Создатель рассылки")
+    owner = models.ForeignKey(Auth, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Создатель рассылки")
     is_publish = models.BooleanField(default=True, verbose_name="Можно запустить")
     status = models.CharField(choices=sending_status, default=CREATED, verbose_name="Статус")
     mail = models.ForeignKey(

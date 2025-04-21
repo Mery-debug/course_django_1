@@ -8,17 +8,17 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views import generic, View
+from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
 from config.settings import EMAIL_HOST_USER, MANAG_GROUP
 from sending_emeil import forms, models
-from sending_emeil.forms import SendingForm
+from sending_emeil.forms import SendingForm, SendingManagerForm
 from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
+class HomeView(TemplateView):
     template_name = "sending_emeil/home.html"
 
     def get_context_data(self, **kwargs):
@@ -29,10 +29,11 @@ class HomeView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class SendingListView(ListView):
+class SendingListView(LoginRequiredMixin, ListView):
     model = Sending
     template_name = "sending_emeil/sending_list.html"
     context_object_name = "sendings"
+    login_url = "/authorization/login/"
     success_url = reverse_lazy("sending_emeil:sending_list")
 
     def get_queryset(self):
@@ -47,7 +48,7 @@ class SendingListView(ListView):
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
-class SendingDetailView(LoginRequiredMixin, DetailView):
+class SendingDetailView(DetailView):
     model = Sending
     template_name = "sending_emeil/sending_detail.html"
 
@@ -109,7 +110,7 @@ class MailListView(ListView):
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
-class MailDetailView(LoginRequiredMixin, DetailView):
+class MailDetailView(DetailView):
     model = Email
     template_name = "sending_emeil/mail_detail.html"
 
@@ -164,7 +165,7 @@ class SendingUserCreateView(LoginRequiredMixin, CreateView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_create.html"
     form_class = forms.SendingUserForm
-    success_url = reverse_lazy("sending_emeil:sending_user_create")
+    success_url = reverse_lazy("sending_emeil:sending_user_list")
 
 
 class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
@@ -191,10 +192,10 @@ class SendingUserUpdateView(LoginRequiredMixin, UpdateView):
 class SendingUserDeleteView(LoginRequiredMixin, DeleteView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_delete.html"
-    success_url = reverse_lazy("sending_emeil:sending_user_delete")
+    success_url = reverse_lazy("sending_emeil:sending_user_list")
 
 
-class SendTryList(LoginRequiredMixin, ListView):
+class SendTryList(ListView):
     model = SendTry
     template_name = "sending_emeil/statistic_list.html"
     context_object_name = "sendtries"

@@ -54,6 +54,13 @@ class AuthRegister(FormView):
         recipient_list = [user_email]
         send_mail(subject, message, from_email, recipient_list)
 
+    def get_auth(self):
+        code_user = self.request.POST('code')
+        user = self.request.user
+        if code_user == code:
+            user.is_auth = True
+        return user
+
 
 class CustomLogoutView(TemplateView):
     template_name = "authorization/goodbye.html"

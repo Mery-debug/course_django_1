@@ -6,7 +6,7 @@ import sending_emeil
 
 
 class Command(BaseCommand):
-    help = 'Создание группы модератор продуктов'
+    help = 'Создание группы менеджер рассылки'
 
     def handle(self, *args, **kwargs):
         group, created = Group.objects.get_or_create(name='Manager')
