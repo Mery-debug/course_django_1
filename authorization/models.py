@@ -7,15 +7,14 @@ from config.settings import MANAG_GROUP
 
 
 class Auth(AbstractUser):
-    email_address = models.EmailField(unique=True)
-    code = models.IntegerField(null=True, blank=True)
+    email_address = models.EmailField(unique=True, verbose_name="адрес почты")
     is_active = models.BooleanField(default=True, null=True, blank=True)
 
     USERNAME_FIELD = "email_address"
     REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
-        return f"{self.email_address} - {self.code}"
+        return f"{self.email_address}"
 
 
     @property
@@ -30,6 +29,8 @@ class Auth(AbstractUser):
 
 class Code(models.Model):
     code = models.CharField(unique=True, help_text="Код из сообщения")
+    email_address = models.ForeignKey(Auth, on_delete=models.CASCADE)
+    is_used = models.BooleanField(default=False)
 
     def __str__(self):
         return self.code

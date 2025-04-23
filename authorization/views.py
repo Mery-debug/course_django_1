@@ -32,9 +32,8 @@ class AuthRegister(FormView):
         confirmation_code = str(next(gen))
 
         Code.objects.create(
-            email=user.email,
-            code=confirmation_code,
-            user=user
+            email_address=user,
+            code=confirmation_code
         )
 
         self.send_confirmation_email(user.email, confirmation_code)
