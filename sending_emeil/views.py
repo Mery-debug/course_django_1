@@ -113,10 +113,21 @@ class SendingDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("sending_emeil:sending_list")
 
 
-class MailListView(ListView):
+class MailListView(LoginRequiredMixin, ListView):
     model = Email
     template_name = "sending_emeil/mail_list.html"
+    login_url = "/authorization/login/"
     context_object_name = "emails"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Email.objects.all()
+        queryset = cache.get('publish_mails')
+        if not queryset:
+            queryset = Email.objects.filter(is_publish=True)
+            cache.set('publish_mails', queryset, 60 * 15)
+        return queryset
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
@@ -175,11 +186,22 @@ class MailDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("sending_emeil:mail_list")
 
 
-class SendingUserListView(ListView):
+class SendingUserListView(LoginRequiredMixin, ListView):
     model = SendingUser
     template_name = "sending_emeil/sending_user_list.html"
     context_object_name = "sendingusers"
+    login_url = "/authorization/login/"
     success_url = reverse_lazy("sending_emeil:sending_user_list")
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return SendingUser.objects.all()
+        queryset = cache.get('publish_sendingusers')
+        if not queryset:
+            queryset = SendingUser.objects.filter(is_publish=True)
+            cache.set('publish_sendingusers', queryset, 60 * 15)
+        return queryset
 
 
 class SendingUserDetailView(LoginRequiredMixin, DetailView):

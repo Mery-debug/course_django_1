@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
@@ -8,14 +9,46 @@ from django.template.context_processors import request
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView
 
-from authorization.forms import CodeForm, AuthForm, ChangePasswordForm, EmailForm
+from authorization.forms import CodeForm, AuthForm, EmailForm
 from authorization.models import Auth, Code
 from authorization.services import random_code_generator
+from config import settings
 from config.settings import EMAIL_HOST_USER
-from sending_emeil.models import SendingUser, Sending
 import secrets
 
-code = next(random_code_generator())
+gen = random_code_generator()
+
+
+class AuthRegister(FormView):
+    template_name = "authorization/registration.html"
+    form_class = AuthForm
+    success_url = reverse_lazy("auth:access_code")
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+
+        confirmation_code = str(next(gen))
+
+        Code.objects.create(
+            email=user.email,
+            code=confirmation_code,
+            user=user
+        )
+
+        self.send_confirmation_email(user.email, confirmation_code)
+
+        self.request.session['email_to_confirm'] = user.email
+
+        return super().form_valid(form)
+
+    def send_confirmation_email(self, email, code):
+        subject = "Подтверждение регистрации"
+        message = f"Ваш код подтверждения: {code}"
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [email]
+        send_mail(subject, message, from_email, recipient_list)
 
 
 class AccessCodeView(FormView):
@@ -24,43 +57,33 @@ class AccessCodeView(FormView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        entered_code = form.cleaned_data['code']
-
-        if Code.objects.filter(code=entered_code).exists():
-            Auth.is_auth = True
-            return super().form_valid(form)
-        else:
-            form.add_error(None, "Неверный код доступа")
+        email = self.request.session.get('email_to_confirm')
+        if not email:
+            form.add_error(None, "Сессия истекла, начните регистрацию заново")
             return self.form_invalid(form)
 
+        entered_code = form.cleaned_data['code']
 
-class AuthRegister(FormView):
-    model = Auth
-    template_name = "authorization/registration.html"
-    form_class = AuthForm
+        try:
+            code_obj = Code.objects.get(
+                email=email,
+                code=entered_code,
+                is_used=False
+            )
 
-    def get_success_url(self):
-        return reverse_lazy("auth:access_code")
+            user = code_obj.user
+            user.is_active = True
+            user.save()
+            code_obj.is_used = True
+            code_obj.save()
 
-    def form_valid(self, form):
-        user = form.save()
-        login(self.request, user)
-        self.send_welcome_email(user.email_address)
-        return super().form_valid(form)
+            login(self.request, user)
 
-    def send_welcome_email(self, user_email):
-        subject = "Добро пожаловать"
-        message = f"Спасибо, что зарегистрировались в нашем сервисе! Введите этот код: {code} на сайте."
-        from_email = EMAIL_HOST_USER
-        recipient_list = [user_email]
-        send_mail(subject, message, from_email, recipient_list)
+            return super().form_valid(form)
 
-    def get_auth(self):
-        code_user = self.request.POST('code')
-        user = self.request.user
-        if code_user == code:
-            user.is_auth = True
-        return user
+        except ValidationError:
+            form.add_error('code', "Неверный код подтверждения")
+            return self.form_invalid(form)
 
 
 class CustomLogoutView(TemplateView):
@@ -80,7 +103,6 @@ class SendEmailView(FormView):
     model = Auth
     form_class = EmailForm
     template_name = "authorization/email_for_change_password.html"
-    success_url = reverse_lazy("authorization:change_password")
 
     def send_email(self, form):
         user = form.save()
@@ -97,11 +119,29 @@ class SendEmailView(FormView):
         )
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse_lazy(
+            "authorization:change_password", kwargs={"token": self.objects.token}
+        )
+
 
 class ChangePasswordView(FormView):
+    model = Auth
     template_name = "authorization/change_password.html"
     form_class = EmailForm
     success_url = reverse_lazy("home")
 
+    # def dispatch(self, request, *args, **kwargs):
+    #     token = kwargs.get('token')
+    #     user = Auth.objects.get(token=token)
+    #     return super().dispatch(request, *args, **kwargs)
+    #
+    # def form_valid(self, form):
+    #     new_password = form.cleaned_data['new_password']
+    #     self.user.set_password(new_password)
+    #     self.user.token = None
+    #     self.user.save()
+    #     messages.success(self.request, "Пароль успешно изменен")
+    #     return super().form_valid(form)
 
 

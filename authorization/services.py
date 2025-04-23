@@ -6,7 +6,5 @@ def random_code_generator():
         yield random.randint(1000, 9999)
 
 
-gen = random_code_generator()
-
 
 
