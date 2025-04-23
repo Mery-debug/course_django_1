@@ -82,7 +82,7 @@ class EmailForm(forms.Form):
         cleaned_data = super().clean()
         email_address = cleaned_data.get("email_address")
 
-        if Auth.objects.filter(email=email_address).exists():
+        if Auth.objects.filter(email_address=email_address).exists():
             return email_address
         raise ValidationError(f"Пользователь с почтой {email_address} не существует. "
                               f"Введите почту, которую вы использовали при регистрации на сайте")
