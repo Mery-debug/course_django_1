@@ -36,18 +36,23 @@ class AuthRegister(FormView):
             code=confirmation_code
         )
 
-        self.send_confirmation_email(user.email, confirmation_code)
+        # self.send_confirmation_email(user.email, confirmation_code)
+        subject = "Подтверждение регистрации"
+        message = f"Ваш код подтверждения: {confirmation_code}"
+        from_email = EMAIL_HOST_USER
+        recipient_list = [user.email]
+        send_mail(subject, message, from_email, recipient_list)
 
         self.request.session['email_to_confirm'] = user.email
 
         return super().form_valid(form)
 
-    def send_confirmation_email(self, email, code):
-        subject = "Подтверждение регистрации"
-        message = f"Ваш код подтверждения: {code}"
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = [email]
-        send_mail(subject, message, from_email, recipient_list)
+    # def send_confirmation_email(self, email, confirmation_code):
+    #     subject = "Подтверждение регистрации"
+    #     message = f"Ваш код подтверждения: {confirmation_code}"
+    #     from_email = EMAIL_HOST_USER
+    #     recipient_list = [email]
+    #     send_mail(subject, message, from_email, recipient_list)
 
 
 class AccessCodeView(FormView):
