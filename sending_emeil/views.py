@@ -1,6 +1,5 @@
-
-
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
@@ -13,7 +12,7 @@ from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
 from config.settings import EMAIL_HOST_USER, MANAG_GROUP
-from sending_emeil import forms, models
+from sending_emeil import forms
 from sending_emeil.forms import SendingForm, SendingManagerForm
 from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
@@ -33,18 +32,30 @@ class SendingListView(LoginRequiredMixin, ListView):
     model = Sending
     template_name = "sending_emeil/sending_list.html"
     context_object_name = "sendings"
-    login_url = "/authorization/login/"
+    login_url = reverse_lazy("authorization:login")
+    paginate_by = 10
     success_url = reverse_lazy("sending_emeil:sending_list")
 
     def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name=MANAG_GROUP).exists():
-            return Sending.objects.all()
-        queryset = cache.get('publish_sendings')
+        cache_key = f'sendings_{"all" if self.is_manager(user) else "published"}'
+
+        queryset = cache.get(cache_key)
+
         if not queryset:
-            queryset = Sending.objects.filter(is_publish=True)
-            cache.set('publish_sendings', queryset, 60 * 15)
+            queryset = Sending.objects.all() if self.is_manager(user) else Sending.objects.filter(is_publish=True)
+            queryset = queryset.select_related('mail')
+
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.is_manager(self.request.user)
+        return context
+
+    @staticmethod
+    def is_manager(user):
+        return user.groups.filter(name=MANAG_GROUP).exists()
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
@@ -116,18 +127,29 @@ class SendingDeleteView(LoginRequiredMixin, DeleteView):
 class MailListView(LoginRequiredMixin, ListView):
     model = Email
     template_name = "sending_emeil/mail_list.html"
-    login_url = "/authorization/login/"
     context_object_name = "emails"
+    login_url = reverse_lazy("authorization:login")
+    paginate_by = 10
 
     def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name=MANAG_GROUP).exists():
-            return Email.objects.all()
-        queryset = cache.get('publish_mails')
+        cache_key = f'mails_{"all" if self.is_manager(user) else "published"}'
+
+        queryset = cache.get(cache_key)
+
         if not queryset:
-            queryset = Email.objects.filter(is_publish=True)
-            cache.set('publish_mails', queryset, 60 * 15)
+            queryset = Email.objects.all() if self.is_manager(user) else Email.objects.filter(is_publish=True)
+
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.is_manager(self.request.user)
+        return context
+
+    @staticmethod
+    def is_manager(user):
+        return user.groups.filter(name=MANAG_GROUP).exists()
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
@@ -191,17 +213,27 @@ class SendingUserListView(LoginRequiredMixin, ListView):
     template_name = "sending_emeil/sending_user_list.html"
     context_object_name = "sendingusers"
     login_url = "/authorization/login/"
+    paginate_by = 10
     success_url = reverse_lazy("sending_emeil:sending_user_list")
 
     def get_queryset(self):
         user = self.request.user
-        if user.groups.filter(name=MANAG_GROUP).exists():
-            return SendingUser.objects.all()
-        queryset = cache.get('publish_sendingusers')
+        cache_key = f'sendingusers_{"all" if user.groups.filter(name=MANAG_GROUP).exists() else "published"}'
+
+        queryset = cache.get(cache_key)
+
         if not queryset:
-            queryset = SendingUser.objects.filter(is_publish=True)
-            cache.set('publish_sendingusers', queryset, 60 * 15)
+            if user.groups.filter(name=MANAG_GROUP).exists():
+                queryset = SendingUser.objects.all()
+            else:
+                queryset = SendingUser.objects.filter(is_publish=True)
+
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.request.user.groups.filter(name=MANAG_GROUP).exists()
+        return context
 
 
 class SendingUserDetailView(LoginRequiredMixin, DetailView):

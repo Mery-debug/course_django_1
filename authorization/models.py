@@ -29,7 +29,7 @@ class Auth(AbstractUser):
 
 class Code(models.Model):
     code = models.CharField(unique=True, help_text="Код из сообщения")
-    email_address = models.ForeignKey(Auth, on_delete=models.CASCADE)
+    user = models.ForeignKey(Auth, on_delete=models.CASCADE)
     is_used = models.BooleanField(default=False)
 
     def __str__(self):

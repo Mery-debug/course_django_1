@@ -1,10 +1,8 @@
-from django.contrib import admin
-from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import path
-from django.views.decorators.cache import cache_page
+from django.contrib.auth.views import LogoutView, PasswordResetDoneView, \
+    PasswordResetConfirmView, PasswordResetCompleteView
+from django.urls import path, reverse_lazy
 
-from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView, ChangePasswordView, \
-    SendEmailView
+from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView, CustomPasswordResetView
 
 app_name = "authorization"
 
@@ -14,9 +12,35 @@ urlpatterns = [
     path(
         "logout/", LogoutView.as_view(next_page="authorization:goodbye"), name="logout"
     ),
-    path("change_password/<str:token>/", SendEmailView.as_view(), name="change_password"),
-    path("email_for_change_password/", ChangePasswordView.as_view(), name="email_for_change_password"),
     path(
+        "password-reset/",
+        CustomPasswordResetView.as_view(
+            template_name="authorization/password_reset_form.html",
+            email_template_name="authorization/password_reset_email.html",
+            subject_template_name="authorization/password_reset_subject.txt",
+            html_email_template_name="authorization/password_reset_email.html",
+            extra_email_context={'site_name': 'ВашСайт'}
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/done/",
+        PasswordResetDoneView.as_view(template_name="authorization/password_reset_done.html"),
+        name="password_reset_done",
+    ),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        PasswordResetConfirmView.as_view(
+            template_name="authorization/password_reset_confirm.html",
+            success_url=reverse_lazy("authorization:password_reset_complete"),
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset/complete/",
+        PasswordResetCompleteView.as_view(template_name="authorization/password_reset_complete.html"),
+        name="password_reset_complete",
+    ),path(
         "goodbye/",
         CustomLogoutView.as_view(template_name="authorization/goodbye.html"),
         name="goodbye",

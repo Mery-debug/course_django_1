@@ -3,42 +3,30 @@
 {% block title %}Рассылка{% endblock %}
 
 {% block content %}
-<ul>
-    {% if not user.is_manag or user.is_active %}
-         <a class="btn btn-dark" href="{% url 'sending_emeil:sending_create' %}">Добавить рассылку</a>
-        {{ form.as_p }}
-        {% for sending in sendings %}
-        <div class="card">
-            <div class="card-body">
-                <li class="list-group-item">
-                    Название рассылки:
-                    <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{sending.mail.subject}}</a>
-                </li>
-                <li class="list-group-item">Статус рассылки: {{sending.status}}</li>
-                <li class="list-group-item">Дата начала отправки: {{sending.date_first}}</li>
-                <li class="list-group-item">Дата окончания отправки: {{sending.date_last}}</li>
-            </div>
-        </div>
-        {% empty %}
-        <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
-        {% endfor %}
-    {% else %}
-        {{ form.as_p }}
-        {% for sending in sendings %}
-        <div class="card">
-            <div class="card-body">
-                <li class="list-group-item">
-                    Название рассылки:
-                    <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{sending.mail.subject}}</a>
-                </li>
-                <li class="list-group-item">Статус рассылки: {{sending.status}}</li>
-                <li class="list-group-item">Дата начала отправки: {{sending.date_first}}</li>
-                <li class="list-group-item">Дата окончания отправки: {{sending.date_last}}</li>
-            </div>
-        </div>
-        {% empty %}
-        <li>У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
-        {% endfor %}
-    {% endif %}
+<ul class="list-unstyled">
+  {% if not user.is_manag or user.is_active %}
+  <a class="btn btn-dark mb-3" href="{% url 'sending_emeil:sending_create' %}">Добавить рассылку</a>
+  {{ form.as_p }}
+  {% endif %}
+
+  {% for sending in sendings %}
+  <div class="card mb-3">
+    <div class="card-body p-2">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item p-2">
+          <strong>Название рассылки:</strong>
+          <a href="{% url 'sending_emeil:sending_detail' sending.pk %}">{{ sending.mail.subject }}</a>
+        </li>
+        <li class="list-group-item p-2"><strong>Статус:</strong> {{ sending.status }}</li>
+        <li class="list-group-item p-2"><strong>Начало:</strong> {{ sending.date_first }}</li>
+        <li class="list-group-item p-2"><strong>Окончание:</strong> {{ sending.date_last }}</li>
+      </ul>
+    </div>
+  </div>
+  {% empty %}
+  <li class="list-group-item">
+    У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.
+  </li>
+  {% endfor %}
 </ul>
 {% endblock %}

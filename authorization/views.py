@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
@@ -29,30 +30,24 @@ class AuthRegister(FormView):
         user.is_active = False
         user.save()
 
-        confirmation_code = str(next(gen))
+        confirmation_code = str(gen)
 
         Code.objects.create(
-            email_address=user,
+            user=user,
             code=confirmation_code
         )
 
-        # self.send_confirmation_email(user.email, confirmation_code)
+        self.send_confirmation_email(user.email_address, confirmation_code)
+
+        self.request.session['email_to_confirm'] = user.email_address
+        return super().form_valid(form)
+
+    def send_confirmation_email(self, email, confirmation_code):
         subject = "Подтверждение регистрации"
         message = f"Ваш код подтверждения: {confirmation_code}"
         from_email = EMAIL_HOST_USER
-        recipient_list = [user.email]
+        recipient_list = [email]
         send_mail(subject, message, from_email, recipient_list)
-
-        self.request.session['email_to_confirm'] = user.email
-
-        return super().form_valid(form)
-
-    # def send_confirmation_email(self, email, confirmation_code):
-    #     subject = "Подтверждение регистрации"
-    #     message = f"Ваш код подтверждения: {confirmation_code}"
-    #     from_email = EMAIL_HOST_USER
-    #     recipient_list = [email]
-    #     send_mail(subject, message, from_email, recipient_list)
 
 
 class AccessCodeView(FormView):
@@ -69,23 +64,26 @@ class AccessCodeView(FormView):
         entered_code = form.cleaned_data['code']
 
         try:
+            user = Auth.objects.get(email_address=email)
+
             code_obj = Code.objects.get(
-                email=email,
+                user=user,
                 code=entered_code,
                 is_used=False
             )
 
-            user = code_obj.user
             user.is_active = True
             user.save()
+
             code_obj.is_used = True
             code_obj.save()
 
-            login(self.request, user)
-
             return super().form_valid(form)
 
-        except ValidationError:
+        except Auth.DoesNotExist:
+            form.add_error(None, "Пользователь не найден")
+            return self.form_invalid(form)
+        except Code.DoesNotExist:
             form.add_error('code', "Неверный код подтверждения")
             return self.form_invalid(form)
 
@@ -129,23 +127,12 @@ class SendEmailView(FormView):
         )
 
 
-class ChangePasswordView(FormView):
-    model = Auth
-    template_name = "authorization/change_password.html"
-    form_class = EmailForm
-    success_url = reverse_lazy("home")
+class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+    success_url = reverse_lazy('authorization:password_reset_done')
+    success_message = "Письмо отправлено. Проверьте вашу почту"
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     token = kwargs.get('token')
-    #     user = Auth.objects.get(token=token)
-    #     return super().dispatch(request, *args, **kwargs)
-    #
-    # def form_valid(self, form):
-    #     new_password = form.cleaned_data['new_password']
-    #     self.user.set_password(new_password)
-    #     self.user.token = None
-    #     self.user.save()
-    #     messages.success(self.request, "Пароль успешно изменен")
-    #     return super().form_valid(form)
+    def form_valid(self, form):
+        print(f"Attempting to send reset email to: {form.cleaned_data['email']}")
+        return super().form_valid(form)
 
 
