@@ -2,7 +2,8 @@ from django.contrib.auth.views import LogoutView, PasswordResetDoneView, \
     PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, reverse_lazy
 
-from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView, CustomPasswordResetView
+from authorization.views import AccessCodeView, AuthRegister, CustomLoginView, CustomLogoutView, \
+    CustomPasswordResetView, CustomPasswordResetCompleteView
 
 app_name = "authorization"
 
@@ -38,9 +39,10 @@ urlpatterns = [
     ),
     path(
         "password-reset/complete/",
-        PasswordResetCompleteView.as_view(template_name="authorization/password_reset_complete.html"),
+        CustomPasswordResetCompleteView.as_view(),
         name="password_reset_complete",
-    ),path(
+    ),
+    path(
         "goodbye/",
         CustomLogoutView.as_view(template_name="authorization/goodbye.html"),
         name="goodbye",

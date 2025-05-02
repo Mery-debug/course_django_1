@@ -1,14 +1,18 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.urls import reverse
 
-from authorization.services import random_code_generator
 from config.settings import MANAG_GROUP
 
 
 class Auth(AbstractUser):
     email_address = models.EmailField(unique=True, verbose_name="адрес почты")
     is_active = models.BooleanField(default=True, null=True, blank=True)
+    password_reset_token = models.CharField(
+        max_length=32,
+        blank=True,
+        null=True,
+        unique=True
+    )
 
     USERNAME_FIELD = "email_address"
     REQUIRED_FIELDS = ["username"]

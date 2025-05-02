@@ -1,13 +1,17 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, PasswordResetView
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetCompleteView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.http import HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.template.context_processors import request
 from django.urls import reverse_lazy
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.views.generic import TemplateView, FormView
 
 from authorization.forms import CodeForm, AuthForm, EmailForm
@@ -101,38 +105,43 @@ class CustomLoginView(LoginView):
     success_url = reverse_lazy("home")
 
 
-class SendEmailView(FormView):
-    model = Auth
-    form_class = EmailForm
-    template_name = "authorization/email_for_change_password.html"
-
-    def send_email(self, form):
-        user = form.save()
-        token = secrets.token_hex(16)
-        user.token = token
-        user.save()
-        host = self.request.get_host()
-        url = f"http://{host}/authorization/change_password/{token}/"
-        send_mail(
-            subject="Подтверждение почты",
-            message=f"Привет, перейди по ссылке для смены пароля {url}",
-            from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email_address],
-        )
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy(
-            "authorization:change_password", kwargs={"token": self.objects.token}
-        )
-
-
-class CustomPasswordResetView(SuccessMessageMixin, PasswordResetView):
+class CustomPasswordResetView(PasswordResetView):
     success_url = reverse_lazy('authorization:password_reset_done')
     success_message = "Письмо отправлено. Проверьте вашу почту"
 
     def form_valid(self, form):
-        print(f"Attempting to send reset email to: {form.cleaned_data['email']}")
-        return super().form_valid(form)
+        email = form.cleaned_data['email']
+
+        try:
+            user = Auth.objects.get(email_address=email)
+        except Auth.DoesNotExist:
+            return HttpResponseServerError("User not found")
+
+        token = secrets.token_hex(16)
+        user.password_reset_token = token
+        user.save()
+
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        host = self.request.get_host()
+        url = f"http://{host}/authorization/password-reset/{uid}/{token}/"
+
+        try:
+            send_mail(
+                subject="Восстановление пароля",
+                message=f"Для восстановления пароля перейдите по ссылке: {url}",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False
+            )
+            return super().form_valid(form)
+        except Exception as e:
+            print(f"Ошибка отправки: {str(e)}")
+            return HttpResponseServerError("Email error")
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = "authorization/password_reset_complete.html"
+    success_url = reverse_lazy("authorization:login")
 
 
