@@ -1,21 +1,40 @@
 <header>
-  <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-    <h5 class="my-0 mr-md-auto font-weight-normal">Список рассылок</h5>
-    <nav class="ms-5">
-      <a class="p-2 btn btn-outline-primary" href="/">На главную</a>
-      <a class="p-2 btn btn-outline-primary" href="/authorization/spam_list/">Список статей</a>
-      <a class="p-2 btn btn-outline-primary" href="/authorization/product_list/">Каталог</a>
-      {% if user.is_active %}
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Рассылка</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/">Главная</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Рассылка
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/sending/sending_list/">Список рассылки</a></li>
+              <li><a class="dropdown-item" href="/sending/mail_list/">Список писем</a></li>
+              <li><a class="dropdown-item" href="/sending/sending_user_list/">Список пользователей</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/sending/statistic_list/">Статистика</a></li>
+            </ul>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center">
+          {% if user.is_active %}
         <form method="post" action="{% url 'authorization:logout' %}" style="display: inline;">
           {% csrf_token %}
           <a href="/authorization/product_list/"><button class="p-2 btn btn-outline-primary" type="submit">Выйти</button></a>
-          <p>Добро пожаловать, {{ user.email }}!</p>
         </form>
       {% else %}
         <a href="{% url 'authorization:login' %}"><button class="p-2 btn btn-outline-primary" type="submit">Войти</button></a>
-        <a href="{% url 'authorization:register' %}"><button class="p-2 btn btn-outline-primary" type="submit">Регистрация</button></a>
-        <p>Добро пожаловать в каталог продуктов!</p>
+        <a href="{% url 'authorization:registration' %}"><button class="p-2 btn btn-outline-primary" type="submit">Регистрация</button></a>
       {% endif %}
-    </nav>
-  </div>
+        </div>
+      </div>
+    </div>
+  </nav>
 </header>

@@ -1,0 +1,10 @@
+{% extends "sending_emeil/base.html" %}
+{% block title %}Вход в систему{% endblock %}
+{% block content %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <a href="{% url 'home' %}"><button type="submit">Войти</button></a>
+    <a href="{% url 'authorization:password_reset' %}">Забыли пароль?</a>
+  </form>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Письма{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список писем</h1>
+
+
+<ul class="list-unstyled">
+  {% if user.is_authenticated %}
+  <a class="btn btn-dark mb-3" href="{% url 'sending_emeil:mail_create' %}">Добавить письмо</a>
+  {% endif %}
+
+  {% for email in emails %}
+  <div class="card mb-3">
+    <div class="card-body p-2">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item p-2">
+          <strong>Тема:</strong>
+          <a href="{% url 'sending_emeil:mail_detail' email.pk %}">{{ email.subject }}</a>
+          {% if not email.is_publish and is_manager %}
+          <span class="badge bg-warning ms-2">Запрещено</span>
+          {% endif %}
+        </li>
+        <li class="list-group-item p-2">
+          <strong>Автор:</strong> {{ email.owner.email_address }}
+        </li>
+        <li class="list-group-item p-2">
+          <strong>Текст:</strong>
+          <div class="text-truncate" style="max-width: 600px;">
+            {{ email.text }}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  {% empty %}
+  <div class="alert alert-info">
+    Нет доступных писем. {% if user.is_authenticated %}Создайте новое письмо.{% endif %}
+  </div>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,8 +1,338 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.cache import cache_page
+from django.views.generic import ListView, TemplateView, DetailView, CreateView, UpdateView, DeleteView
+
+from config.settings import EMAIL_HOST_USER, MANAG_GROUP
+from sending_emeil import forms
+from sending_emeil.forms import SendingForm, SendingManagerForm
+from sending_emeil.models import Sending, SendingUser, Email, SendTry
 
 
 class HomeView(TemplateView):
     template_name = "sending_emeil/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["count_sending"] = Sending.objects.count()
+        context["count_active_sending"] = Sending.objects.filter(status="STARTED").count()
+        context["unique_sendinguser"] = SendingUser.objects.count()
+        return context
+
+
+class SendingListView(LoginRequiredMixin, ListView):
+    model = Sending
+    template_name = "sending_emeil/sending_list.html"
+    context_object_name = "sendings"
+    login_url = reverse_lazy("authorization:login")
+    paginate_by = 10
+    success_url = reverse_lazy("sending_emeil:sending_list")
+
+    def get_queryset(self):
+        user = self.request.user
+        cache_key = f'sendings_{"all" if self.is_manager(user) else "published"}'
+
+        queryset = cache.get(cache_key)
+
+        if not queryset:
+            queryset = Sending.objects.all() if self.is_manager(user) else Sending.objects.filter(is_publish=True)
+            queryset = queryset.select_related('mail')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.is_manager(self.request.user)
+        return context
+
+    @staticmethod
+    def is_manager(user):
+        return user.groups.filter(name=MANAG_GROUP).exists()
+
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
+class SendingDetailView(DetailView):
+    model = Sending
+    template_name = "sending_emeil/sending_detail.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
+        )
+
+    def get_form_class(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return SendingManagerForm
+        return SendingForm
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        return Sending.objects.filter(is_publish=True)
+
+
+class SendingCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
+    model = Sending
+    form_class = forms.SendingForm
+    template_name = "sending_emeil/sending_create.html"
+
+    def get_success_url(self):
+        return reverse_lazy("sending_emeil:sending_list")
+
+    def form_valid(self, form):
+        sending = form.save(commit=False)
+        user = self.request.user
+        sending.owner = user
+        sending.save()
+        return super().form_valid(form)
+
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
+
+
+class SendingUpdateView(LoginRequiredMixin, UpdateView):
+    model = Sending
+    form_class = forms.SendingForm
+    template_name = "sending_emeil/sending_update.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:sending_detail", kwargs={"pk": self.object.pk}
+        )
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Sending.objects.all()
+        return Sending.objects.filter(is_publish=True)
+
+
+class SendingDeleteView(LoginRequiredMixin, DeleteView):
+    model = Sending
+    template_name = "sending_emeil/sending_delete.html"
+    success_url = reverse_lazy("sending_emeil:sending_list")
+
+
+class MailListView(LoginRequiredMixin, ListView):
+    model = Email
+    template_name = "sending_emeil/mail_list.html"
+    context_object_name = "emails"
+    login_url = reverse_lazy("authorization:login")
+    paginate_by = 10
+
+    def get_queryset(self):
+        user = self.request.user
+        cache_key = f'mails_{"all" if self.is_manager(user) else "published"}'
+
+        queryset = cache.get(cache_key)
+
+        if not queryset:
+            queryset = Email.objects.all() if self.is_manager(user) else Email.objects.filter(is_publish=True)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.is_manager(self.request.user)
+        return context
+
+    @staticmethod
+    def is_manager(user):
+        return user.groups.filter(name=MANAG_GROUP).exists()
+
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
+class MailDetailView(DetailView):
+    model = Email
+    template_name = "sending_emeil/mail_detail.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
+        )
+
+
+class MailUpdateView(LoginRequiredMixin, UpdateView):
+    model = Email
+    form_class = forms.EmailForm
+    template_name = "sending_emeil/mail_update.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
+        )
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return Email.objects.all()
+        return Email.objects.filter(is_publish=True)
+
+
+class MailCreateView(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
+    model = Email
+    form_class = forms.EmailForm
+    template_name = "sending_emeil/mail_create.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:mail_detail", kwargs={"pk": self.object.pk}
+        )
+
+    def form_valid(self, form):
+        mail = form.save(commit=False)
+        user = self.request.user
+        mail.owner = user
+        mail.save()
+        return super().form_valid(form)
+
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
+
+
+class MailDeleteView(LoginRequiredMixin, DeleteView):
+    model = Email
+    template_name = "sending_emeil/mail_delete.html"
+    success_url = reverse_lazy("sending_emeil:mail_list")
+
+
+class SendingUserListView(LoginRequiredMixin, ListView):
+    model = SendingUser
+    template_name = "sending_emeil/sending_user_list.html"
+    context_object_name = "sendingusers"
+    login_url = "/authorization/login/"
+    paginate_by = 10
+    success_url = reverse_lazy("sending_emeil:sending_user_list")
+
+    def get_queryset(self):
+        user = self.request.user
+        cache_key = f'sendingusers_{"all" if user.groups.filter(name=MANAG_GROUP).exists() else "published"}'
+
+        queryset = cache.get(cache_key)
+
+        if not queryset:
+            if user.groups.filter(name=MANAG_GROUP).exists():
+                queryset = SendingUser.objects.all()
+            else:
+                queryset = SendingUser.objects.filter(is_publish=True)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_manager'] = self.request.user.groups.filter(name=MANAG_GROUP).exists()
+        return context
+
+
+class SendingUserDetailView(LoginRequiredMixin, DetailView):
+    model = SendingUser
+    template_name = "sending_emeil/sending_user_detail.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:sending_user_detail", kwargs={"pk": self.object.pk}
+        )
+
+
+class SendingUserCreateView(LoginRequiredMixin, CreateView):
+    model = SendingUser
+    template_name = "sending_emeil/sending_user_create.html"
+    form_class = forms.SendingUserForm
+    success_url = reverse_lazy("sending_emeil:sending_user_list")
+
+    def form_valid(self, form):
+        sending_user = form.save(commit=False)
+        user = self.request.user
+        sending_user.owner = user
+        sending_user.save()
+        return super().form_valid(form)
+
+    def has_permission(self):
+        if not self.request.user.groups.filter(name=MANAG_GROUP).exists():
+            return self.request.user.is_active
+
+
+class SendingUserUpdateView(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
+    model = SendingUser
+    form_class = forms.SendingUserForm
+    template_name = "sending_emeil/sending_user_update.html"
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "sending_emeil:sending_user_update", kwargs={"pk": self.object.pk}
+        )
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name=MANAG_GROUP).exists():
+            return SendingUser.objects.all()
+        queryset = cache.get('published_sending_user')
+        if not queryset:
+            queryset = SendingUser.objects.filter(is_publish=True)
+            cache.set('published_sending_user', queryset, 60 * 15)
+        return queryset
+
+
+class SendingUserDeleteView(LoginRequiredMixin, DeleteView):
+    model = SendingUser
+    template_name = "sending_emeil/sending_user_delete.html"
+    success_url = reverse_lazy("sending_emeil:sending_user_list")
+
+
+class SendTryList(ListView):
+    model = SendTry
+    template_name = "sending_emeil/statistic_list.html"
+    context_object_name = "sendtries"
+    success_url = reverse_lazy("sending_emeil:statistic_list")
+
+
+class SendingView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        sending = get_object_or_404(Sending, pk=pk)
+        if sending.status == Sending.STOPPED:
+            return HttpResponseForbidden(f"Рассылка не может быть отправлена, так как её статус {sending.status}")
+        if sending.status == Sending.CREATED:
+            sending.status = Sending.STARTED
+            sending.date_of_try = timezone.now()
+            sending.save()
+            for user in sending.users.all():
+                tries = SendTry(sending=sending)
+                try:
+                    send_mail(
+                        sending.mail.subject,
+                        sending.mail.text,
+                        from_email=EMAIL_HOST_USER,
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
+                    tries.status = SendTry.SUCCESS
+                    tries.answer_server = "Письмо отправлено успешно."
+                except Exception as e:
+                    tries.status = SendTry.FAILURE
+                    tries.answer_server = str(e)
+                tries.save()
+            sending.status = Sending.COMPLETED
+            sending.end_sending = timezone.now()
+            sending.save()
+        sending_stat = SendTry.objects.filter(sending=sending)
+        return render(
+            request, "sending_emeil/statistic_list.html", {"sending": sending, "sending_try": sending_stat}
+        )
+
+
+
+
 
 

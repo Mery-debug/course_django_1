@@ -1,0 +1,22 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Статистика по рассылкам{% endblock %}
+{% block content %}
+<ul>
+  {% for sendtry in sendtries %}
+  <div class="card">
+    <div class="card-body">
+      <li class="list-group-item">Тема письма рассылки: {{sendtry.sending.mail}}</li>
+      <li class="list-group-item">Статус рассылки: {{sendtry.status}}</li>
+      <li class="list-group-item">Дата начала отправки: {{sendtry.date_of_try}}</li>
+      <li class="list-group-item">Ответ сервера: {{sendtry.answer_server}}</li>
+    </div>
+  </div>
+  {% empty %}
+  <li>У вас не было еще ни одной рассылки.</li>
+  {% endfor %}
+</ul>
+
+
+
+{% endblock %}

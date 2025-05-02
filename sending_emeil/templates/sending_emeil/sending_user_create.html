@@ -1,0 +1,16 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Добавление нового пользователя{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Добавление нового пользователя</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'sending:sending_user_list' %}">
+                <button type="submit" class="btn btn-dark">Сохранить</button>
+            </a>
+            <a href="{% url 'sending:sending_user_list' %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+{% endblock %}

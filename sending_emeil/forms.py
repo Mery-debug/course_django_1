@@ -1,0 +1,114 @@
+from django import forms
+from django.core.exceptions import ValidationError
+
+from .models import Email, Sending, SendingUser
+
+
+class EmailForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(EmailForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = Email
+        fields = ['subject', 'text']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-control",
+                    "placeholder": f"{self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+class SendingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Sending
+        fields = ['mail', 'users']
+        widgets = {
+            'users': forms.CheckboxSelectMultiple,
+        }
+
+
+class SendingUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingUserForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = SendingUser
+        fields = ['email', 'fio', 'description']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "form-control",
+                    "placeholder": f"{self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+class SendingManagerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingManagerForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = Sending
+        fields = ['is_publish']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "checkbox",
+                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+class MailManagerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(MailManagerForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = Email
+        fields = ['is_publish']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "checkbox",
+                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+class SendingUserManagerForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SendingUserManagerForm, self).__init__(*args, **kwargs)
+        self.update_field_attributes()
+
+    class Meta:
+        model = SendingUser
+        fields = ['is_publish']
+
+    def update_field_attributes(self):
+        for field_name in self.fields:
+            self.fields[field_name].widget.attrs.update(
+                {
+                    "class": "checkbox",
+                    "placeholder": f"Введите {self.fields[field_name].label.lower()}",
+                }
+            )
+
+
+

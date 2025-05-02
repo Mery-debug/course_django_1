@@ -1,0 +1,18 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}{{ email.subject }}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{{ email.subject }}</h1>
+<ul>
+    <div class="card">
+        <div class="card-body">
+            {% csrf_token %}
+            <li class="list-group-item">Тема письма: {{ email.subject }}</li>
+            <li class="list-group-item">Текст письма: {{ email.text }}</li>
+            <a href="{% url 'sending_emeil:mail_update' email.pk %}" class="btn btn-secondary">Редактировать</a>
+            <a href="{% url 'sending_emeil:mail_delete' email.pk %}" class="btn btn-danger">Удалить</a>
+            <a href="{% url 'sending_emeil:mail_list' %}" class="btn btn-primary">Вернуться к списку</a>
+        </div>
+    </div>
+</ul>
+{% endblock %}

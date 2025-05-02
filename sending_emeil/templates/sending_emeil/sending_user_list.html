@@ -1,0 +1,56 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Список пользователей{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Список пользователей</h1>
+
+<ul class="list-unstyled">
+  <a class="btn btn-dark mb-3" href="{% url 'sending_emeil:sending_user_create' %}">Добавить пользователя</a>
+  {{ form.as_p }}
+
+  {% for sendinguser in sendingusers %}
+  <div class="card mb-3">
+    <div class="card-body p-2">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item p-2">
+          <strong>Адрес почты пользователя:</strong>
+          <a href="{% url 'sending_emeil:sending_user_detail' sendinguser.pk %}">{{ sendinguser.email }}</a>
+        </li>
+        <li class="list-group-item p-2"><strong>ФИО:</strong> {{ sendinguser.fio }}</li>
+        <li class="list-group-item p-2"><strong>Описание:</strong> {{ sendinguser.description }}</li>
+        {% if not sendinguser.is_publish %}
+        <li class="list-group-item p-2 text-warning">Не опубликован</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+  {% empty %}
+  <li class="list-group-item">У вас не было еще ни одной рассылки, возможно, вы еще не авторизованы или не имеете достаточно прав доступа.</li>
+  {% endfor %}
+</ul>
+
+{% if is_paginated %}
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+    </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+    <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+      <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+    </li>
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

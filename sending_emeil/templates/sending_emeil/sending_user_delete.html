@@ -1,0 +1,14 @@
+{% extends 'sending_emeil/base.html' %}
+
+{% block title %}Удаление {{ sendinguser.fio }}{% endblock %}
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Удалить пользователя</h1>
+        <p>Вы уверены, что хотите удалить "{{ sendinguser.fio }}"?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'sending_emeil:sending_user_detail' sendinguser.pk %}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+{% endblock %}
